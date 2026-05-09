@@ -1,6 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 import express from "express";
 import conectaNaDatabase from "./src/config/dbConnect.js";
 import routes from "./src/routes/index.js";
