@@ -2,6 +2,13 @@ import express from "express";
 import conectaNaDatabase from "./src/config/dbConnect.js";
 import routes from "./src/routes/index.js";
 
+console.log('Variáveis de ambiente:', {
+    STRING_CONNECTION_DB: process.env.STRING_CONNECTION_DB ? 'DEFINIDA ✅' : 'UNDEFINED ❌',
+    JWT_SECRET: process.env.JWT_SECRET ? 'DEFINIDA ✅' : 'UNDEFINED ❌',
+    PORT: process.env.PORT,
+    NODE_ENV: process.env.NODE_ENV,
+});
+
 const conexao = await conectaNaDatabase();
 
 conexao.on("error", (erro) => {
