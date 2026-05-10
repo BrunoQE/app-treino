@@ -131,6 +131,41 @@ class HistoricoController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    static async buscarEvolucao(req, res) {
+        try {
+            const historicos = await historico
+                .find({ usuario: req.usuario._id })
+                .sort({ dataFim: 1 })
+                .exec();
+
+            // Monta evolução por exercício
+            const evolucao = {};
+            historicos.forEach(h => {
+                h.exerciciosRealizados.forEach(ex => {
+                    if (!ex.peso) return;
+                    if (!evolucao[ex.nome]) evolucao[ex.nome] = [];
+                    evolucao[ex.nome].push({
+                        data: h.dataFim,
+                        peso: ex.peso,
+                    });
+                });
+            });
+
+            // Filtra só exercícios com mais de 1 registro
+            const resultado = {};
+            Object.keys(evolucao).forEach(nome => {
+                if (evolucao[nome].length >= 1) {
+                    resultado[nome] = evolucao[nome];
+                }
+            });
+
+            res.status(200).json(resultado);
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 function calcularRecorde(diasTreinados) {
