@@ -108,6 +108,29 @@ class HistoricoController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    static async buscarRecordes(req, res) {
+        try {
+            const historicos = await historico.find({ usuario: req.usuario._id })
+                .sort({ dataFim: -1 })
+                .exec();
+
+            const recordes = {};
+            historicos.forEach(h => {
+                h.exerciciosRealizados.forEach(ex => {
+                    if (!ex.peso) return;
+                    if (!recordes[ex.nome] || ex.peso > recordes[ex.nome]) {
+                        recordes[ex.nome] = ex.peso;
+                    }
+                });
+            });
+
+            res.status(200).json(recordes);
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 function calcularRecorde(diasTreinados) {
