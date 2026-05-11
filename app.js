@@ -18,6 +18,10 @@ conexao.once("open", () => {
 });
 
 const app = express();
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 routes(app);
 
 export default app;
