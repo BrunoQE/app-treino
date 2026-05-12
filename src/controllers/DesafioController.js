@@ -97,10 +97,19 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
     const inicioSemana = getInicioSemana();
     const fimSemana = getFimSemana();
 
+    console.log('Início semana:', inicioSemana);
+    console.log('Fim semana:', fimSemana);
+
     const treinosSemana = await historico.find({
         usuario: usuarioId,
         dataFim: { $gte: inicioSemana, $lte: fimSemana },
     }).sort({ dataFim: 1 });
+
+    console.log('Treinos encontrados:', treinosSemana.length);
+    console.log('Durações:', treinosSemana.map(t => ({
+        data: t.dataFim,
+        duracao: t.duracaoMinutos
+    })));
 
     let atualizado = false;
 
