@@ -97,19 +97,10 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
     const inicioSemana = getInicioSemana();
     const fimSemana = getFimSemana();
 
-    console.log('Início semana:', inicioSemana);
-    console.log('Fim semana:', fimSemana);
-
     const treinosSemana = await historico.find({
         usuario: usuarioId,
         dataFim: { $gte: inicioSemana, $lte: fimSemana },
     }).sort({ dataFim: 1 });
-
-    console.log('Treinos encontrados:', treinosSemana.length);
-    console.log('Durações:', treinosSemana.map(t => ({
-        data: t.dataFim,
-        duracao: t.duracaoMinutos
-    })));
 
     let atualizado = false;
 
@@ -119,7 +110,11 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
         let progresso = 0;
 
         if (desafio.tipo === 'treinos_semana') {
-            progresso = treinosSemana.length;
+            // Conta 1 treino por dia
+            const diasUnicos = [...new Set(
+                treinosSemana.map(t => new Date(t.dataFim).toLocaleDateString('pt-BR'))
+            )];
+            progresso = diasUnicos.length;
         }
 
         if (desafio.tipo === 'dias_seguidos') {
@@ -127,13 +122,20 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
         }
 
         if (desafio.tipo === 'duracao') {
-            const maiorDuracao = treinosSemana.reduce((max, t) =>
+            // Maior treino único da semana
+            progresso = treinosSemana.reduce((max, t) =>
                 t.duracaoMinutos > max ? t.duracaoMinutos : max, 0);
-            progresso = maiorDuracao;
         }
 
-        desafio.progresso = Math.min(progresso, desafio.meta);
-        if (progresso >= desafio.meta) {
+        const novoProgresso = Math.min(progresso, desafio.meta);
+
+        // ← Salva sempre que o progresso mudar, não só quando concluir
+        if (novoProgresso !== desafio.progresso) {
+            desafio.progresso = novoProgresso;
+            atualizado = true;
+        }
+
+        if (progresso >= desafio.meta && !desafio.concluido) {
             desafio.concluido = true;
             atualizado = true;
         }
@@ -149,6 +151,7 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
 
     if (atualizado) {
         await desafioSemana.save();
+        console.log('Desafio atualizado!');
     }
 }
 
