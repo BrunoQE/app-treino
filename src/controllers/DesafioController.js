@@ -38,6 +38,55 @@ function gerarDesafios(nivel) {
     return desafiosPorNivel[nivel];
 }
 
+// Definição dos badges e suas metas
+const BADGES_CONQUISTA = {
+    dedicado: {
+        nome: 'Dedicado',
+        emoji_bronze: '🔥',
+        emoji_prata: '🔥🔥',
+        emoji_ouro: '🔥🔥🔥',
+        descricao: 'Dias de streak',
+        metas: { bronze: 7, prata: 14, ouro: 30 },
+        tipo: 'streak',
+    },
+    forte: {
+        nome: 'Forte',
+        emoji_bronze: '💪',
+        emoji_prata: '💪💪',
+        emoji_ouro: '💪💪💪',
+        descricao: 'Treinos completados',
+        metas: { bronze: 10, prata: 30, ouro: 100 },
+        tipo: 'total_treinos',
+    },
+    resistente: {
+        nome: 'Resistente',
+        emoji_bronze: '⏱',
+        emoji_prata: '⏱⏱',
+        emoji_ouro: '⏱⏱⏱',
+        descricao: 'Treinos acima de 30 minutos',
+        metas: { bronze: 1, prata: 5, ouro: 20 },
+        tipo: 'treinos_longos',
+    },
+    consistente: {
+        nome: 'Consistente',
+        emoji_bronze: '📅',
+        emoji_prata: '📅📅',
+        emoji_ouro: '📅📅📅',
+        descricao: 'Semanas de desafios completadas',
+        metas: { bronze: 2, prata: 5, ouro: 10 },
+        tipo: 'semanas_desafios',
+    },
+    evoluido: {
+        nome: 'Evoluído',
+        emoji_bronze: '⚡',
+        emoji_prata: '⚡⚡',
+        emoji_ouro: '⚡⚡⚡',
+        descricao: 'Recordes pessoais quebrados',
+        metas: { bronze: 1, prata: 10, ouro: 50 },
+        tipo: 'recordes',
+    },
+};
+
 class DesafioController {
 
     // GET /desafios — busca ou cria desafios da semana atual
@@ -85,6 +134,99 @@ class DesafioController {
                 .sort({ createdAt: -1 })
                 .limit(10);
             res.status(200).json(desafios);
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    static async buscarBadgesConquistados(req, res) {
+        try {
+            const usuarioId = req.usuario._id;
+
+            // Dados necessários para calcular badges
+            const [historicos, desafios] = await Promise.all([
+                historico.find({ usuario: usuarioId }),
+                Desafio.find({ usuario: usuarioId }),
+                historico.find({ usuario: usuarioId }),
+            ]);
+
+            // Calcula métricas
+            const totalTreinos = historicos.length;
+
+            // Streak atual
+            const diasTreinados = [...new Set(
+                historicos.map(h => new Date(h.dataFim).toLocaleDateString('pt-BR'))
+            )];
+            const hoje = new Date();
+            const ontem = new Date(hoje);
+            ontem.setDate(hoje.getDate() - 1);
+            const treinouHoje = diasTreinados.includes(hoje.toLocaleDateString('pt-BR'));
+            const treinouOntem = diasTreinados.includes(ontem.toLocaleDateString('pt-BR'));
+            let streakAtual = 0;
+            if (treinouHoje || treinouOntem) {
+                const diaInicio = treinouHoje ? hoje : ontem;
+                for (let i = 0; i < diasTreinados.length; i++) {
+                    const diaEsperado = new Date(diaInicio);
+                    diaEsperado.setDate(diaInicio.getDate() - i);
+                    if (diasTreinados.includes(diaEsperado.toLocaleDateString('pt-BR'))) {
+                        streakAtual++;
+                    } else break;
+                }
+            }
+
+            // Treinos longos (acima de 30min)
+            const treinosLongos = historicos.filter(h => h.duracaoMinutos >= 30).length;
+
+            // Semanas de desafios completas
+            const semanasCompletas = desafios.filter(d => d.concluido).length;
+
+            // Recordes — conta exercícios únicos com peso crescente
+            const recordesQuebrados = new Set();
+            const pesosPorExercicio = {};
+            historicos
+                .sort((a, b) => new Date(a.dataFim) - new Date(b.dataFim))
+                .forEach(h => {
+                    h.exerciciosRealizados.forEach(ex => {
+                        if (!ex.peso) return;
+                        if (!pesosPorExercicio[ex.nome]) {
+                            pesosPorExercicio[ex.nome] = ex.peso;
+                        } else if (ex.peso > pesosPorExercicio[ex.nome]) {
+                            pesosPorExercicio[ex.nome] = ex.peso;
+                            recordesQuebrados.add(`${ex.nome}_${ex.peso}`);
+                        }
+                    });
+                });
+
+            const metricas = {
+                streak: streakAtual,
+                total_treinos: totalTreinos,
+                treinos_longos: treinosLongos,
+                semanas_desafios: semanasCompletas,
+                recordes: recordesQuebrados.size,
+            };
+
+            // Calcula nível de cada badge
+            const resultado = {};
+            for (const [id, badge] of Object.entries(BADGES_CONQUISTA)) {
+                const valor = metricas[badge.tipo] ?? 0;
+                let nivel = null;
+                if (valor >= badge.metas.ouro) nivel = 'ouro';
+                else if (valor >= badge.metas.prata) nivel = 'prata';
+                else if (valor >= badge.metas.bronze) nivel = 'bronze';
+
+                resultado[id] = {
+                    ...badge,
+                    valor,
+                    nivel,
+                    proximaMeta: nivel === 'ouro' ? null :
+                        nivel === 'prata' ? badge.metas.ouro :
+                            nivel === 'bronze' ? badge.metas.prata :
+                                badge.metas.bronze,
+                };
+            }
+
+            res.status(200).json(resultado);
         } catch (error) {
             console.error('ERRO:', error);
             res.status(500).json({ message: error.message });
