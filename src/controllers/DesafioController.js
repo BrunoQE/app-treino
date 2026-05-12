@@ -21,18 +21,18 @@ function gerarDesafios(nivel) {
     const desafiosPorNivel = {
         Iniciante: [
             { tipo: 'treinos_semana', descricao: 'Complete 2 treinos essa semana', meta: 2, pontos: 10 },
-            { tipo: 'dias_seguidos', descricao: 'Treine 2 dias seguidos', meta: 2, pontos: 15 },
-            { tipo: 'duracao', descricao: 'Complete um treino de pelo menos 20 minutos', meta: 20, pontos: 10 },
+            { tipo: 'dias_seguidos', descricao: 'Treine 2 dias seguidos nessa semana', meta: 2, pontos: 15 },
+            { tipo: 'duracao', descricao: 'Complete 1 treino de pelo menos 20 minutos', meta: 20, pontos: 10 },
         ],
         Intermediario: [
             { tipo: 'treinos_semana', descricao: 'Complete 4 treinos essa semana', meta: 4, pontos: 20 },
-            { tipo: 'dias_seguidos', descricao: 'Treine 3 dias seguidos', meta: 3, pontos: 25 },
-            { tipo: 'duracao', descricao: 'Complete um treino acima de 40 minutos', meta: 40, pontos: 20 },
+            { tipo: 'dias_seguidos', descricao: 'Treine 3 dias seguidos nessa semana', meta: 3, pontos: 25 },
+            { tipo: 'duracao', descricao: 'Complete 1 treino de pelo menos 40 minutos', meta: 40, pontos: 20 },
         ],
         Avancado: [
             { tipo: 'treinos_semana', descricao: 'Complete 5 treinos essa semana', meta: 5, pontos: 30 },
-            { tipo: 'dias_seguidos', descricao: 'Treine 4 dias seguidos', meta: 4, pontos: 35 },
-            { tipo: 'duracao', descricao: 'Complete um treino acima de 60 minutos', meta: 60, pontos: 30 },
+            { tipo: 'dias_seguidos', descricao: 'Treine 4 dias seguidos nessa semana', meta: 4, pontos: 35 },
+            { tipo: 'duracao', descricao: 'Complete 1 treino de pelo menos 60 minutos', meta: 60, pontos: 30 },
         ],
     };
     return desafiosPorNivel[nivel];
@@ -146,8 +146,9 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
 function getInicioSemana() {
     const hoje = new Date();
     const dia = hoje.getDay();
-    const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
-    const inicio = new Date(hoje.setDate(diff));
+    const diff = dia === 0 ? -6 : 1 - dia;
+    const inicio = new Date(hoje);
+    inicio.setDate(hoje.getDate() + diff);
     inicio.setHours(0, 0, 0, 0);
     return inicio;
 }
@@ -162,15 +163,27 @@ function getFimSemana() {
 
 function calcularDiasSeguidos(treinos) {
     if (treinos.length === 0) return 0;
+
+    // Extrai dias únicos ordenados
     const dias = [...new Set(treinos.map(t =>
         new Date(t.dataFim).toLocaleDateString('pt-BR')
-    ))];
+    ))].sort((a, b) => {
+        const dA = new Date(a.split('/').reverse().join('-'));
+        const dB = new Date(b.split('/').reverse().join('-'));
+        return dA - dB;
+    });
+
+    if (dias.length === 0) return 0;
+
+    // Conta sequência máxima de dias consecutivos
     let maxSeguidos = 1;
     let atual = 1;
+
     for (let i = 1; i < dias.length; i++) {
         const diaAnterior = new Date(dias[i - 1].split('/').reverse().join('-'));
         const diaAtual = new Date(dias[i].split('/').reverse().join('-'));
         const diff = Math.round((diaAtual - diaAnterior) / (1000 * 60 * 60 * 24));
+
         if (diff === 1) {
             atual++;
             if (atual > maxSeguidos) maxSeguidos = atual;
@@ -178,6 +191,7 @@ function calcularDiasSeguidos(treinos) {
             atual = 1;
         }
     }
+
     return maxSeguidos;
 }
 
