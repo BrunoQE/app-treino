@@ -166,6 +166,62 @@ class HistoricoController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    static async buscarSugestoesIA(req, res) {
+        try {
+            const { treinoId } = req.params;
+
+            // Busca últimos 3 históricos que contêm exercícios desse treino
+            const historicos = await historico
+                .find({
+                    usuario: req.usuario._id,
+                    treino: treinoId,
+                })
+                .sort({ dataFim: -1 })
+                .limit(3)
+                .exec();
+
+            if (historicos.length < 3) {
+                return res.status(200).json({ sugestoes: [] });
+            }
+
+            // Verifica se os 3 últimos treinos foram completos
+            const sugestoes = [];
+            const exerciciosUltimo = historicos[0].exerciciosRealizados;
+
+            for (const ex of exerciciosUltimo) {
+                if (!ex.peso) continue;
+
+                // Verifica se o mesmo exercício aparece nos 3 históricos com mesmo peso
+                const pesos = historicos.map(h => {
+                    const encontrado = h.exerciciosRealizados.find(e => e.nome === ex.nome);
+                    return encontrado?.peso ?? null;
+                });
+
+                // Todos os 3 treinos com mesmo peso e não nulo
+                const todosMesmoPeso = pesos.every(p => p !== null && p === pesos[0]);
+                if (!todosMesmoPeso) continue;
+
+                // Calcula sugestão de aumento
+                const pesoAtual = ex.peso;
+                const incremento = pesoAtual < 20 ? 2.5 : pesoAtual < 60 ? 5 : 10;
+                const pesoSugerido = pesoAtual + incremento;
+
+                sugestoes.push({
+                    nome: ex.nome,
+                    grupoMuscular: ex.grupoMuscular,
+                    pesoAtual,
+                    pesoSugerido,
+                    incremento,
+                });
+            }
+
+            res.status(200).json({ sugestoes });
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 function calcularRecorde(diasTreinados) {
