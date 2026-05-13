@@ -6,6 +6,7 @@ class TreinoController {
     static async listarTreino(req, res) {
         try {
             const litarTreinos = await treino.find({ usuario: req.usuario._id }).populate('exercicios.exercicio').exec();
+            console.log('Exercicios: ', litarTreinos);
             res.status(200).json(litarTreinos);
         } catch (error) {
             res.status(500).json({ message: `${error.message} - falha na requisição` });
