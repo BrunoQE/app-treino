@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const treinoSchema = new mongoose.Schema({
     nome: { type: String, required: true },
     diaSugerido: {
-        type: String,
-        enum: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+        type: String
     },
     exercicios: [{
         exercicio: { type: mongoose.Schema.Types.ObjectId, ref: 'exercicios', required: true },
