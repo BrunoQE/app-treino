@@ -34,7 +34,7 @@ class TreinoController {
             const treinoCriado = await treino.create({
                 nome,
                 diaSugerido,
-                program: programaId ?? null,
+                programa: programaId ?? null,
                 usuario: req.usuario._id
             });
             const treinoCompleto = await treino.findById(treinoCriado._id).populate('exercicios.exercicio');
