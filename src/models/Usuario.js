@@ -12,6 +12,8 @@ const usuarioSchema = new mongoose.Schema({
     },
     senha: { type: String, required: true, minlenght: 6 },
     fotoPerfil: { type: String, default: null },
+    codigoReset: { type: String, default: null },
+    codigoResetExpira: { type: Date, default: null },
 }, { versionKey: false, timestamps: true });
 
 //antes de salvar criptografa a senha automaticamente
