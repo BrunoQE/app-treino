@@ -14,7 +14,8 @@ const treinoSchema = new mongoose.Schema({
         ordem: { type: Number },
         tempoDescanso: { type: Number, default: 60 }
     }],
-    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'usuarios', required: true }
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'usuarios', required: true },
+    programa: { type: mongoose.Schema.Types.ObjectId, ref: 'programas', default: null }
 }, { versionKey: false, timestamps: true });
 
 const treino = mongoose.model("treinos", treinoSchema);

@@ -6,6 +6,7 @@ import historico from "../routes/historicoRoutes.js";
 import autenticar from "../middlewares/authMiddleware.js";
 import desafio from "../routes/desafioRouters.js";
 import resetSenhaRoutes from "../routes/resetSenhaRoutes.js";
+import programaRoutetes from "../routes/programaRoutes.js";
 
 const routes = (app) => {
     app.route("/").get((req, res) => res.status(200).send("Treino Certo API"));
@@ -14,7 +15,7 @@ const routes = (app) => {
     app.use(express.json(), auth, resetSenhaRoutes);
 
     // Rotas protegidas
-    app.use(express.json(), autenticar, treino, exercicio, historico, desafio);
+    app.use(express.json(), autenticar, treino, exercicio, historico, desafio, programaRoutetes);
 };
 
 export default routes;

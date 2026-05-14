@@ -30,7 +30,13 @@ class TreinoController {
     // POST /treinos — cria novo treino
     static async cadastrarTreino(req, res) {
         try {
-            const treinoCriado = await treino.create({ ...req.body, usuario: req.usuario._id });
+            const { nome, diaSugerido, programaId } = req.body;
+            const treinoCriado = await treino.create({
+                nome,
+                diaSugerido,
+                program: programaId ?? null,
+                usuario: req.usuario._id
+            });
             const treinoCompleto = await treino.findById(treinoCriado._id).populate('exercicios.exercicio');
             res.status(201).json({ message: "Treino cadastrado com sucesso", treino: treinoCompleto });
         } catch (error) {
