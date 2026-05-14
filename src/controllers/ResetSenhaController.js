@@ -1,17 +1,8 @@
 import usuario from "../models/Usuario.js";
-import nodemailer from "nodemailer";
 import crypto from "crypto";
+import { Resend } from "resend";
 
-/// Configura o transporter do Gmail
-function criarTransporte() {
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 class ResetSenhaController {
 
@@ -36,8 +27,7 @@ class ResetSenhaController {
             usuarioEncontrado.codigoResetExpira = expira;
             await usuarioEncontrado.save();
 
-            const transporter = criarTransporte();
-            await transporter.sendMail({
+            await resend.emails.send({
                 from: `"Treino Absoluto" <${process.env.EMAIL_USER}>`,
                 to: usuarioEncontrado.email,
                 subject: 'Código de recuperação de senha',
