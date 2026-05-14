@@ -78,6 +78,35 @@ class ExercicioController {
         }
     }
 
+    static async buscarSubstitutos(req, res) {
+        try {
+            const { grupoMuscular, exercicioAtualId, exerciciosNoTreinoIds } = req.query;
+
+            if (!grupoMuscular) {
+                return res.status(400).json({ message: 'Informe o grupo muscular.' });
+            }
+
+            // IDs a excluir — exercício atual + exercícios já no treino
+            const idsExcluir = [
+                exercicioAtualId,
+                ...(exerciciosNoTreinoIds ? exerciciosNoTreinoIds.split(',') : [])
+            ].filter(Boolean);
+
+            const substitutos = await exercicio
+                .find({
+                    grupoMuscular,
+                    _id: { $nin: idsExcluir }
+                })
+                .limit(3)
+                .exec();
+
+            res.status(200).json(substitutos);
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
 }
 
 export default ExercicioController;

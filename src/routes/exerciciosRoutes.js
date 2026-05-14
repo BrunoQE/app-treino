@@ -5,6 +5,7 @@ const routes = express.Router();
 
 routes.get("/exercicios", ExercicioController.listarExercicios);
 routes.get("/exercicios/busca", ExercicioController.listarExercicioPorGrupoMuscular);
+routes.get('/exercicios/substitutos', ExercicioController.buscarSubstitutos);
 routes.get("/exercicios/:id", ExercicioController.listarExercicioPorId);
 
 
