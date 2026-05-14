@@ -28,7 +28,7 @@ class ResetSenhaController {
             await usuarioEncontrado.save();
 
             await resend.emails.send({
-                from: `"Treino Absoluto" <${process.env.EMAIL_USER}>`,
+                from: `"Treino Absoluto" <onboarding@resend.dev>`,
                 to: usuarioEncontrado.email,
                 subject: 'Código de recuperação de senha',
                 html: `
