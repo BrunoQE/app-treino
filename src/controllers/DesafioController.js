@@ -87,6 +87,10 @@ const BADGES_CONQUISTA = {
     },
 };
 
+const GRUPOS_MUSCULARES = [
+    'Peito', 'Costas', 'Pernas', 'Biceps', 'Triceps', 'Ombros', 'Abdominais'
+];
+
 class DesafioController {
 
     // GET /desafios — busca ou cria desafios da semana atual
@@ -232,6 +236,97 @@ class DesafioController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    static async buscarBadgesGrupo(req, res) {
+        try {
+            const usuarioId = req.usuario._id;
+            const historicos = await historico
+                .find({ usuario: usuarioId })
+                .sort({ dataFim: 1 });
+
+            const resultado = {};
+
+            for (const grupo of GRUPOS_MUSCULARES) {
+                // Filtra treinos válidos para o grupo
+                // Regras anti-burla:
+                // - Mínimo 20 minutos
+                // - Mínimo 3 exercícios do grupo
+                // - Máximo 1 treino por grupo por dia
+                // - Dias distribuídos em semanas diferentes
+
+                const diasContados = new Set();
+                const semanasContadas = new Set();
+                let recordesNoGrupo = 0;
+                let treinosValidos = 0;
+                const pesosPorExercicio = {};
+
+                for (const h of historicos) {
+                    if (h.duracaoMinutos < 20) continue;
+
+                    const exerciciosDoGrupo = h.exerciciosRealizados.filter(
+                        ex => ex.grupoMuscular === grupo
+                    );
+                    if (exerciciosDoGrupo.length < 3) continue;
+
+                    const dataStr = new Date(h.dataFim).toLocaleDateString('pt-BR');
+                    if (diasContados.has(dataStr)) continue;
+
+                    diasContados.add(dataStr);
+                    const semana = getSemanaDoAno(new Date(h.dataFim));
+                    semanasContadas.add(semana);
+                    treinosValidos++;
+
+                    // Conta recordes no grupo
+                    for (const ex of exerciciosDoGrupo) {
+                        if (!ex.peso) continue;
+                        if (!pesosPorExercicio[ex.nome]) {
+                            pesosPorExercicio[ex.nome] = ex.peso;
+                        } else if (ex.peso > pesosPorExercicio[ex.nome]) {
+                            pesosPorExercicio[ex.nome] = ex.peso;
+                            recordesNoGrupo++;
+                        }
+                    }
+                }
+
+                // Define nível
+                let nivel = null;
+                let proximaMeta = 10;
+
+                if (treinosValidos >= 10) {
+                    nivel = 'bronze';
+                    proximaMeta = 25;
+                }
+                if (treinosValidos >= 25 && recordesNoGrupo >= 1) {
+                    nivel = 'prata';
+                    proximaMeta = 50;
+                }
+                if (treinosValidos >= 50 && recordesNoGrupo >= 3 && semanasContadas.size >= 8) {
+                    nivel = 'ouro';
+                    proximaMeta = 100;
+                }
+                if (treinosValidos >= 100 && recordesNoGrupo >= 10 && semanasContadas.size >= 24) {
+                    nivel = 'elite';
+                    proximaMeta = null;
+                }
+
+                resultado[grupo] = {
+                    grupo,
+                    emoji: getEmojiGrupo(grupo),
+                    treinosValidos,
+                    recordesNoGrupo,
+                    semanasUnicas: semanasContadas.size,
+                    nivel,
+                    proximaMeta,
+                    metas: { bronze: 10, prata: 25, ouro: 50, elite: 100 },
+                };
+            }
+
+            res.status(200).json(resultado);
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 // Atualiza progresso de cada desafio baseado no histórico da semana
@@ -347,6 +442,20 @@ function calcularDiasSeguidos(treinos) {
     }
 
     return maxSeguidos;
+}
+
+function getSemanaDoAno(data) {
+    const inicio = new Date(data.getFullYear(), 0, 1);
+    const semana = Math.ceil((((data - inicio) / 86400000) + inicio.getDay() + 1) / 7);
+    return `${data.getFullYear()}-W${semana}`;
+}
+
+function getEmojiGrupo(grupo) {
+    const emojis = {
+        'Peito': '💪', 'Costas': '🔙', 'Pernas': '🦵',
+        'Biceps': '💪', 'Triceps': '⚡', 'Ombros': '🏋️', 'Abdominais': '🔥'
+    };
+    return emojis[grupo] ?? '🏅';
 }
 
 export default DesafioController;
