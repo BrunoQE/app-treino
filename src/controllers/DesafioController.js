@@ -260,15 +260,18 @@ class DesafioController {
                 let treinosValidos = 0;
                 const pesosPorExercicio = {};
 
-                for (const h of historicos) {
+                const historicos2 = await historico.find({ usuario: usuarioId }).sort({ dataFim: 1 });
+
+                console.log('Total históricos encontrados:', historicos2.length);
+                historicos2.forEach(h => {
                     console.log('Histórico:', {
                         duracao: h.duracaoMinutos,
-                        exercicios: h.exerciciosRealizados.map(ex => ({
+                        exercicios: h.exerciciosRealizados?.map(ex => ({
                             nome: ex.nome,
                             grupo: ex.grupoMuscular
                         }))
                     });
-                }
+                });
 
                 for (const h of historicos) {
                     if (h.duracaoMinutos < 20) continue;
