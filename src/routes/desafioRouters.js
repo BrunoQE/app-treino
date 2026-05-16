@@ -6,5 +6,6 @@ const routes = express.Router();
 routes.get('/desafios', DesafioController.buscarDesafios);
 routes.get('/desafios/historico', DesafioController.buscarHistorico);
 routes.get('/desafios/badges', DesafioController.buscarBadgesConquistados);
+routes.get('/desafios/badges-grupo', DesafioController.buscarBadgesGrupo);
 
 export default routes;
