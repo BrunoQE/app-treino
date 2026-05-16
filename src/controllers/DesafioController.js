@@ -246,6 +246,13 @@ class DesafioController {
 
             const resultado = {};
 
+            const todos = await historico.find({});
+            console.log('Total geral no banco:', todos.length);
+
+            const historicoUsuario = await historico.find({ usuario: usuarioId });
+            console.log('Histórico do usuário:', historicoUsuario.length);
+            console.log('UsuarioId usado:', usuarioId);
+
             for (const grupo of GRUPOS_MUSCULARES) {
                 // Filtra treinos válidos para o grupo
                 // Regras anti-burla:
@@ -259,19 +266,6 @@ class DesafioController {
                 let recordesNoGrupo = 0;
                 let treinosValidos = 0;
                 const pesosPorExercicio = {};
-
-                const historicos2 = await historico.find({ usuario: usuarioId }).sort({ dataFim: 1 });
-
-                console.log('Total históricos encontrados:', historicos2.length);
-                historicos2.forEach(h => {
-                    console.log('Histórico:', {
-                        duracao: h.duracaoMinutos,
-                        exercicios: h.exerciciosRealizados?.map(ex => ({
-                            nome: ex.nome,
-                            grupo: ex.grupoMuscular
-                        }))
-                    });
-                });
 
                 for (const h of historicos) {
                     if (h.duracaoMinutos < 20) continue;
