@@ -261,6 +261,16 @@ class DesafioController {
                 const pesosPorExercicio = {};
 
                 for (const h of historicos) {
+                    console.log('Histórico:', {
+                        duracao: h.duracaoMinutos,
+                        exercicios: h.exerciciosRealizados.map(ex => ({
+                            nome: ex.nome,
+                            grupo: ex.grupoMuscular
+                        }))
+                    });
+                }
+
+                for (const h of historicos) {
                     if (h.duracaoMinutos < 20) continue;
 
                     const exerciciosDoGrupo = h.exerciciosRealizados.filter(
