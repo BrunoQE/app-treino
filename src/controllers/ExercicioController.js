@@ -5,10 +5,32 @@ class ExercicioController {
 
     static async listarExercicios(req, res) {
         try {
-            const listarExercicios = await exercicio.find({});
-            res.status(200).json(listarExercicios);
+            const { grupo, busca, pagina = 1, limite = 20 } = req.query;
+
+            const filtro = {};
+            if (grupo) filtro.grupoMuscular = grupo;
+            if (busca) filtro.nome = { $regex: busca, $options: 'i' };
+
+            const skip = (pagina - 1) * limite;
+
+            const [exercicios, total] = await Promise.all([
+                exercicios
+                    .find(filtro)
+                    .select('nome grupoMuscular equipamento dificuldade gifUrl exerciseId')
+                    .sort({ nome: 1 })
+                    .skip(skip)
+                    .limit(Number(limite)),
+                exercicios.countDocuments(filtro),
+            ]);
+
+            res.status(200).json({
+                exercicios,
+                total,
+                paginas: Math.ceil(total / limite),
+                paginaAtual: Number(pagina),
+            });
         } catch (error) {
-            res.status(500).json({ message: `${error.message} - falha na requisição` });
+            res.status(500).json({ message: error.message });
         }
     }
 
