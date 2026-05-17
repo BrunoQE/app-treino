@@ -246,13 +246,6 @@ class DesafioController {
 
             const resultado = {};
 
-            const todos = await historico.find({});
-            console.log('Total geral no banco:', todos.length);
-
-            const historicoUsuario = await historico.find({ usuario: usuarioId });
-            console.log('Histórico do usuário:', historicoUsuario.length);
-            console.log('UsuarioId usado:', usuarioId);
-
             for (const grupo of GRUPOS_MUSCULARES) {
                 // Filtra treinos válidos para o grupo
                 // Regras anti-burla:
