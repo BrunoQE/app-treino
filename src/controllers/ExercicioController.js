@@ -13,18 +13,18 @@ class ExercicioController {
 
             const skip = (pagina - 1) * limite;
 
-            const [exercicios, total] = await Promise.all([
-                exercicios
+            const [resultado, total] = await Promise.all([
+                exercicio
                     .find(filtro)
                     .select('nome grupoMuscular equipamento dificuldade gifUrl exerciseId')
                     .sort({ nome: 1 })
                     .skip(skip)
                     .limit(Number(limite)),
-                exercicios.countDocuments(filtro),
+                exercicio.countDocuments(filtro),
             ]);
 
             res.status(200).json({
-                exercicios,
+                exercicios: resultado,
                 total,
                 paginas: Math.ceil(total / limite),
                 paginaAtual: Number(pagina),
