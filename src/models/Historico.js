@@ -12,7 +12,8 @@ const historicoSchema = new mongoose.Schema({
         grupoMuscular: { type: String },
         serie: { type: Number },
         repeticoes: { type: String },
-        peso: { type: Number }
+        peso: { type: Number },
+        pesosPorSerie: [{ type: Number }]
     }]
 }, { versionKey: false, timestamps: true });
 
