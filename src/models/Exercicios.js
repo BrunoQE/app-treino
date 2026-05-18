@@ -16,6 +16,7 @@ const exercicioSchema = new mongoose.Schema({
     categoria: { type: String, default: null },
     musculosSecundarios: { type: [String], default: [] },
     partesCorpo: { type: [String], default: [] },
+    tipo: { type: String, enum: ['padrao', 'cardio', 'isometrico'], default: 'padrao' }
 }, { versionKey: false, timestamps: true });
 
 const exercicio = mongoose.model("exercicios", exercicioSchema);

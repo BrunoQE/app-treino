@@ -81,6 +81,8 @@ class TreinoController {
     // POST /treinos/:id/exercicios — adiciona exercício ao treino
     static async adicionarExercicioAoTreinoo(req, res) {
         try {
+            const { exercicioId, serie, repeticoes, peso, tempoDescanso, tipo, tempoTotal, tempoPorSerie } = req.body;
+
             const treinoEncontrado = await treino.findById(req.params.id);
             if (!treinoEncontrado)
                 return res.status(404).json({ message: "Treino não encontrado" });
@@ -88,11 +90,15 @@ class TreinoController {
             const proximaOrdem = treinoEncontrado.exercicios.length + 1;
 
             const novoExercicio = {
-                exercicio: req.body.exercicioId,
-                serie: req.body.serie,
-                repeticoes: req.body.repeticoes,
-                peso: req.body.peso,
-                ordem: req.body.ordem ?? proximaOrdem
+                exercicio: exercicioId,
+                tipo: tipo ?? 'padrao',
+                serie: serie ?? null,
+                repeticoes: repeticoes ?? null,
+                peso: peso ?? null,
+                tempoDescanso: tempoDescanso ?? 60,
+                tempoTotal: tempoTotal ?? null,
+                tempoPorSerie: tempoPorSerie ?? null,
+                ordem: proximaOrdem,
             };
 
             treinoEncontrado.exercicios.push(novoExercicio);
