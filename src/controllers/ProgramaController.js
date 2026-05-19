@@ -615,7 +615,6 @@ class ProgramaController {
                 return res.status(404).json({ message: 'Programa não encontrado no catálogo.' });
             }
 
-            // Verifica se já adicionou
             const jaExiste = await Programa.findOne({
                 usuario: req.usuario._id,
                 catalogoId: id
@@ -624,41 +623,67 @@ class ProgramaController {
                 return res.status(400).json({ message: 'Você já adicionou este programa.' });
             }
 
-            // Cria o programa
             const programa = await Programa.create({
                 nome: programaCatalogo.nome,
                 descricao: programaCatalogo.descricao,
                 emoji: programaCatalogo.emoji,
+                cor: programaCatalogo.cor,
+                nivel: programaCatalogo.nivel,
+                objetivo: programaCatalogo.objetivo,
+                diasPorSemana: programaCatalogo.diasPorSemana,
                 usuario: req.usuario._id,
                 doCatalogo: true,
                 catalogoId: id,
             });
 
-            // Busca exercícios do catálogo por nome
             const Exercicios = (await import('../models/Exercicios.js')).default;
 
-            // Cria os treinos do programa
             for (const treinoCat of programaCatalogo.treinos) {
                 const exerciciosComIds = await Promise.all(
                     treinoCat.exercicios.map(async (ex, ordem) => {
-                        const exercicioEncontrado = await Exercicios.findOne({
-                            nome: { $regex: new RegExp(ex.nome, 'i') }
+                        // Tenta busca exata primeiro
+                        let exercicioEncontrado = await Exercicios.findOne({
+                            nome: { $regex: new RegExp(`^${ex.nome}$`, 'i') }
                         });
-                        if (!exercicioEncontrado) return null;
+
+                        // Se não achou, busca por palavras-chave principais
+                        if (!exercicioEncontrado) {
+                            const palavras = ex.nome
+                                .split(' ')
+                                .filter(p => p.length > 3)
+                                .slice(0, 3)
+                                .join('.*');
+                            exercicioEncontrado = await Exercicios.findOne({
+                                nome: { $regex: new RegExp(palavras, 'i') }
+                            });
+                        }
+
+                        if (!exercicioEncontrado) {
+                            console.log(`⚠️ Não encontrado: "${ex.nome}"`);
+                            return null;
+                        }
+
                         return {
                             exercicio: exercicioEncontrado._id,
+                            tipo: ex.tipo ?? 'padrao',
                             serie: ex.serie,
-                            repeticoes: ex.repeticoes,
-                            tempoDescanso: ex.tempoDescanso,
+                            repeticoes: String(ex.repeticoes),
+                            peso: ex.peso ?? null,
+                            tempoDescanso: ex.tempoDescanso ?? 60,
+                            tempoTotal: ex.tempoTotal ?? null,
+                            tempoPorSerie: ex.tempoPorSerie ?? null,
                             ordem,
                         };
                     })
                 );
 
+                const encontrados = exerciciosComIds.filter(Boolean);
+                console.log(`✅ Treino "${treinoCat.nome}": ${encontrados.length}/${treinoCat.exercicios.length} exercícios encontrados`);
+
                 await Treino.create({
                     nome: treinoCat.nome,
                     diaSugerido: treinoCat.diaSugerido,
-                    exercicios: exerciciosComIds.filter(Boolean),
+                    exercicios: encontrados,
                     usuario: req.usuario._id,
                     programa: programa._id,
                 });
