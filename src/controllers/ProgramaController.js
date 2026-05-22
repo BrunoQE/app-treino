@@ -281,9 +281,9 @@ const CATALOGO = [
                 nome: 'Cardio HIIT',
                 diaSugerido: 'Terça',
                 exercicios: [
-                    { nome: 'Sprint na esteira (30s corrida / 30s pausa)', serie: 10, repeticoes: '30 seg', tempoDescanso: 30 },
+                    { nome: 'Sprint na esteira (30s corrida / 30s pausa)', serie: 10, repeticoes: '30 seg', tempoDescanso: 30, tipo: 'cardio', tempoTotal: 5 },
                     { nome: 'Pulo na caixa (box jump)', serie: 3, repeticoes: '10', tempoDescanso: 60 },
-                    { nome: 'Corda (jumping rope)', serie: 3, repeticoes: '60 seg', tempoDescanso: 30 },
+                    { nome: 'Corda (jumping rope)', serie: 3, repeticoes: '60 seg', tempoDescanso: 30, tipo: 'cardio', tempoTotal: 3 },
                     { nome: 'Mountain climber', serie: 3, repeticoes: '30 seg', tempoDescanso: 30 },
                 ],
             },
@@ -304,9 +304,9 @@ const CATALOGO = [
                 exercicios: [
                     { nome: 'Abdominal supra 3/4', serie: 3, repeticoes: '20-25', tempoDescanso: 30 },
                     { nome: 'Abdominal infra', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
-                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
+                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30, tipo: 'isometrico', tempoPorSerie: 30 },
                     { nome: 'Bicicleta abdominal', serie: 3, repeticoes: '30 seg', tempoDescanso: 30 },
-                    { nome: 'Elíptico', serie: 1, repeticoes: '20 min', tempoDescanso: 0 },
+                    { nome: 'Elíptico', serie: 1, repeticoes: '20 min', tempoDescanso: 0, tipo: 'cardio', tempoTotal: 20 },
                 ],
             },
             {
@@ -426,9 +426,9 @@ const CATALOGO = [
                 diaSugerido: 'Quinta',
                 exercicios: [
                     { nome: 'Abdominal supra 3/4', serie: 3, repeticoes: '25-30', tempoDescanso: 30 },
-                    { nome: 'Prancha frontal', serie: 4, repeticoes: '45-60 seg', tempoDescanso: 30 },
-                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
-                    { nome: 'Mountain climber', serie: 3, repeticoes: '30 seg', tempoDescanso: 30 },
+                    { nome: 'Prancha frontal', serie: 4, repeticoes: '45-60 seg', tempoDescanso: 30, tipo: 'isometrico', tempoPorSerie: 45 },
+                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30, tipo: 'isometrico', tempoPorSerie: 30 },
+                    { nome: 'Mountain climber', serie: 3, repeticoes: '30 seg', tempoDescanso: 30, tipo: 'isometrico', tempoPorSerie: 30 },
                     { nome: 'Superman (extensão lombar)', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
                 ],
             },
