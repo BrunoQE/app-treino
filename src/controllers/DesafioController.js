@@ -1,12 +1,16 @@
 import Desafio from '../models/Desafio.js';
 import historico from '../models/Historico.js';
 
-// Calcula semana atual no formato "2026-W20"
+// Semana no formato "2026-W20" começando no domingo
 function getSemanaAtual() {
     const agora = new Date();
-    const inicio = new Date(agora.getFullYear(), 0, 1);
-    const semana = Math.ceil((((agora - inicio) / 86400000) + inicio.getDay() + 1) / 7);
-    return `${agora.getFullYear()}-W${semana.toString().padStart(2, '0')}`;
+    const domingo = new Date(agora);
+    domingo.setDate(agora.getDate() - agora.getDay()); // volta para domingo
+    domingo.setHours(0, 0, 0, 0);
+
+    const inicio = new Date(domingo.getFullYear(), 0, 1);
+    const semana = Math.ceil((((domingo - inicio) / 86400000) + inicio.getDay() + 1) / 7);
+    return `${domingo.getFullYear()}-W${semana.toString().padStart(2, '0')}`;
 }
 
 // Define nível baseado no total de treinos
@@ -394,18 +398,16 @@ async function atualizarProgresso(desafioSemana, usuarioId) {
 
 function getInicioSemana() {
     const hoje = new Date();
-    const dia = hoje.getDay();
-    const diff = dia === 0 ? -6 : 1 - dia;
-    const inicio = new Date(hoje);
-    inicio.setDate(hoje.getDate() + diff);
-    inicio.setHours(0, 0, 0, 0);
-    return inicio;
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay()); // domingo atual
+    domingo.setHours(0, 0, 0, 0);
+    return domingo;
 }
 
 function getFimSemana() {
     const inicio = getInicioSemana();
     const fim = new Date(inicio);
-    fim.setDate(inicio.getDate() + 6);
+    fim.setDate(inicio.getDate() + 6); // sábado
     fim.setHours(23, 59, 59, 999);
     return fim;
 }

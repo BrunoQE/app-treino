@@ -1,7 +1,6 @@
 import Programa from '../models/Programa.js';
 import Treino from '../models/Treino.js';
 
-// Catálogo de programas prontos
 const CATALOGO = [
     {
         id: 'shape_praia',
@@ -20,17 +19,17 @@ const CATALOGO = [
                     { nome: 'Supino reto com barra', serie: 4, repeticoes: '8-12', tempoDescanso: 90 },
                     { nome: 'Supino inclinado com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Crucifixo com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Crossover na polia', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Flexão de braço declinada', serie: 3, repeticoes: 'até falhar', tempoDescanso: 60 },
+                    { nome: 'Cross-over na polia', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Flexão declinada', serie: 3, repeticoes: 'até falhar', tempoDescanso: 60 },
                 ],
             },
             {
                 nome: 'Ombros — Shape de Praia',
                 diaSugerido: 'Quarta',
                 exercicios: [
-                    { nome: 'Desenvolvimento com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
+                    { nome: 'Desenvolvimento sentado com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
                     { nome: 'Elevação lateral com halteres', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Elevação frontal alternada', serie: 3, repeticoes: '12', tempoDescanso: 60 },
+                    { nome: 'Elevação frontal alternada sentada com halteres', serie: 3, repeticoes: '12', tempoDescanso: 60 },
                     { nome: 'Remada alta com barra', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Encolhimento com halteres', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
@@ -40,9 +39,9 @@ const CATALOGO = [
                 diaSugerido: 'Sexta',
                 exercicios: [
                     { nome: 'Rosca direta com barra', serie: 4, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Rosca alternada com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
-                    { nome: 'Rosca concentrada', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
-                    { nome: 'Tríceps na polia alta', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Rosca bíceps alternada com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
+                    { nome: 'Rosca concentrada com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
+                    { nome: 'Tríceps corda na polia', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Tríceps testa com barra', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Mergulho entre bancos', serie: 3, repeticoes: 'até falhar', tempoDescanso: 60 },
                 ],
@@ -65,21 +64,21 @@ const CATALOGO = [
                 exercicios: [
                     { nome: 'Supino reto com barra', serie: 4, repeticoes: '6-10', tempoDescanso: 120 },
                     { nome: 'Supino inclinado com halteres', serie: 3, repeticoes: '8-12', tempoDescanso: 90 },
-                    { nome: 'Crossover na polia', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Tríceps na polia (corda)', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Tríceps testa com barra W', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Cross-over na polia', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Tríceps corda na polia', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Tríceps francês sentado com barra W', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                 ],
             },
             {
                 nome: 'Costas e Bíceps',
                 diaSugerido: 'Terça',
                 exercicios: [
-                    { nome: 'Barra fixa pronada', serie: 4, repeticoes: '6-10', tempoDescanso: 120 },
+                    { nome: 'Barra fixa', serie: 4, repeticoes: '6-10', tempoDescanso: 120 },
                     { nome: 'Remada curvada com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
-                    { nome: 'Puxada na polia alta', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Remada unilateral com haltere', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
+                    { nome: 'Puxada alta na polia', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Remada curvada unilateral com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
                     { nome: 'Rosca direta com barra', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
-                    { nome: 'Rosca scott', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
+                    { nome: 'Rosca Scott com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
                 ],
             },
             {
@@ -87,10 +86,10 @@ const CATALOGO = [
                 diaSugerido: 'Quinta',
                 exercicios: [
                     { nome: 'Agachamento livre com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 120 },
-                    { nome: 'Leg press 45°', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
-                    { nome: 'Cadeira extensora', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Leg press com pés altos', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
+                    { nome: 'Cadeira extensora na máquina', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Stiff com barra', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
-                    { nome: 'Cadeira flexora', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Cadeira flexora na máquina', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Panturrilha em pé na máquina', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
             },
@@ -98,12 +97,12 @@ const CATALOGO = [
                 nome: 'Ombros e Abdômen',
                 diaSugerido: 'Sexta',
                 exercicios: [
-                    { nome: 'Desenvolvimento com halteres', serie: 4, repeticoes: '8-12', tempoDescanso: 90 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 4, repeticoes: '8-12', tempoDescanso: 90 },
                     { nome: 'Elevação lateral com halteres', serie: 4, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Elevação posterior (voador inverso)', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Abdominal na polia', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Crucifixo invertido (voador inverso)', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Abdominal ajoelhado na polia', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                     { nome: 'Prancha isométrica', serie: 3, repeticoes: '45 seg', tempoDescanso: 45 },
-                    { nome: 'Elevação de pernas', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Elevação de pernas suspenso', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
             },
         ],
@@ -122,10 +121,10 @@ const CATALOGO = [
                 nome: 'Glúteos e Quadríceps',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Agachamento sumô com haltere', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
+                    { nome: 'Agachamento búlgaro', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
                     { nome: 'Leg press com pés altos', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
-                    { nome: 'Agachamento búlgaro', serie: 3, repeticoes: '10-12 por perna', tempoDescanso: 75 },
-                    { nome: 'Cadeira extensora', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Agachamento búlgaro (cadeira)', serie: 3, repeticoes: '10-12 por perna', tempoDescanso: 75 },
+                    { nome: 'Cadeira extensora na máquina', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                     { nome: 'Passada com halteres', serie: 3, repeticoes: '12 por perna', tempoDescanso: 60 },
                 ],
             },
@@ -133,11 +132,11 @@ const CATALOGO = [
                 nome: 'Glúteos e Posteriores',
                 diaSugerido: 'Quarta',
                 exercicios: [
-                    { nome: 'Elevação pélvica com barra', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
+                    { nome: 'Ponte glútea com barra', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
                     { nome: 'Stiff com halteres', serie: 4, repeticoes: '12-15', tempoDescanso: 75 },
                     { nome: 'Kickback na polia baixa', serie: 3, repeticoes: '15 por perna', tempoDescanso: 45 },
-                    { nome: 'Cadeira flexora', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Abdução de quadril na máquina', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Cadeira flexora na máquina', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Adutor na máquina', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
             },
             {
@@ -145,10 +144,10 @@ const CATALOGO = [
                 diaSugerido: 'Sexta',
                 exercicios: [
                     { nome: 'Agachamento livre com barra', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
-                    { nome: 'Elevação pélvica unilateral', serie: 3, repeticoes: '12 por perna', tempoDescanso: 60 },
+                    { nome: 'Ponte glútea com barra', serie: 3, repeticoes: '12 por perna', tempoDescanso: 60 },
                     { nome: 'Adutor na máquina', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                     { nome: 'Panturrilha em pé na máquina', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
-                    { nome: 'Panturrilha sentada na máquina', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Elevação de panturrilha sentado na máquina', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
             },
         ],
@@ -168,10 +167,10 @@ const CATALOGO = [
                 diaSugerido: 'Segunda',
                 exercicios: [
                     { nome: 'Agachamento livre com barra', serie: 5, repeticoes: '3-5', tempoDescanso: 180 },
-                    { nome: 'Agachamento frontal', serie: 3, repeticoes: '5-6', tempoDescanso: 150 },
-                    { nome: 'Leg press 45°', serie: 3, repeticoes: '8-10', tempoDescanso: 120 },
-                    { nome: 'Cadeira extensora', serie: 3, repeticoes: '10-12', tempoDescanso: 90 },
-                    { nome: 'Good morning', serie: 3, repeticoes: '8-10', tempoDescanso: 90 },
+                    { nome: 'Agachamento frontal com barra', serie: 3, repeticoes: '5-6', tempoDescanso: 150 },
+                    { nome: 'Leg press com pés altos', serie: 3, repeticoes: '8-10', tempoDescanso: 120 },
+                    { nome: 'Cadeira extensora na máquina', serie: 3, repeticoes: '10-12', tempoDescanso: 90 },
+                    { nome: 'Good morning com barra', serie: 3, repeticoes: '8-10', tempoDescanso: 90 },
                 ],
             },
             {
@@ -180,19 +179,19 @@ const CATALOGO = [
                 exercicios: [
                     { nome: 'Supino reto com barra', serie: 5, repeticoes: '3-5', tempoDescanso: 180 },
                     { nome: 'Supino inclinado com barra', serie: 3, repeticoes: '5-6', tempoDescanso: 150 },
-                    { nome: 'Desenvolvimento com barra (press militar)', serie: 3, repeticoes: '5-8', tempoDescanso: 120 },
+                    { nome: 'Desenvolvimento militar em pé com barra', serie: 3, repeticoes: '5-8', tempoDescanso: 120 },
                     { nome: 'Paralelas com peso', serie: 3, repeticoes: '6-8', tempoDescanso: 120 },
-                    { nome: 'Tríceps na polia (barra reta)', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Tríceps na polia com barra V', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                 ],
             },
             {
                 nome: 'Dia do Levantamento Terra',
                 diaSugerido: 'Quinta',
                 exercicios: [
-                    { nome: 'Levantamento terra convencional', serie: 5, repeticoes: '3-5', tempoDescanso: 180 },
-                    { nome: 'Levantamento terra romeno', serie: 3, repeticoes: '6-8', tempoDescanso: 150 },
+                    { nome: 'Levantamento terra com barra', serie: 5, repeticoes: '3-5', tempoDescanso: 180 },
+                    { nome: 'Levantamento terra romeno com barra', serie: 3, repeticoes: '6-8', tempoDescanso: 150 },
                     { nome: 'Remada curvada com barra', serie: 4, repeticoes: '6-8', tempoDescanso: 120 },
-                    { nome: 'Barra fixa pronada com peso', serie: 3, repeticoes: '6-8', tempoDescanso: 120 },
+                    { nome: 'Barra fixa com carga', serie: 3, repeticoes: '6-8', tempoDescanso: 120 },
                     { nome: 'Hiperextensão lombar', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                 ],
             },
@@ -223,11 +222,11 @@ const CATALOGO = [
                 nome: 'Full Body A',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Agachamento livre', serie: 3, repeticoes: '10-12', tempoDescanso: 90 },
+                    { nome: 'Agachamento com peso corporal', serie: 3, repeticoes: '10-12', tempoDescanso: 90 },
                     { nome: 'Supino reto com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Puxada na polia alta (pronada)', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Desenvolvimento com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Rosca direta com halteres', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Puxada alta na polia', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Rosca bíceps em pé com halteres', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Tríceps na polia', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
                 ],
             },
@@ -235,12 +234,12 @@ const CATALOGO = [
                 nome: 'Full Body B',
                 diaSugerido: 'Quarta',
                 exercicios: [
-                    { nome: 'Leg press 45°', serie: 3, repeticoes: '12-15', tempoDescanso: 90 },
+                    { nome: 'Leg press com pés altos', serie: 3, repeticoes: '12-15', tempoDescanso: 90 },
                     { nome: 'Supino inclinado com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Remada cavalinho', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Elevação lateral com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Rosca scott', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Tríceps francês com haltere', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Rosca Scott com halteres', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Tríceps francês em pé com halteres', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
                 ],
             },
             {
@@ -250,8 +249,8 @@ const CATALOGO = [
                     { nome: 'Stiff com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 90 },
                     { nome: 'Crucifixo com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Barra fixa supinada', serie: 3, repeticoes: 'máx', tempoDescanso: 90 },
-                    { nome: 'Desenvolvimento Arnold', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Rosca martelo', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Rosca martelo com halteres', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Tríceps coice com haltere', serie: 2, repeticoes: '12-15', tempoDescanso: 60 },
                 ],
             },
@@ -271,10 +270,10 @@ const CATALOGO = [
                 nome: 'Superior — Queima Total',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Flexão de braço', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
-                    { nome: 'Remada com haltere', serie: 3, repeticoes: '15', tempoDescanso: 30 },
-                    { nome: 'Desenvolvimento com halteres', serie: 3, repeticoes: '15', tempoDescanso: 30 },
-                    { nome: 'Supino com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
+                    { nome: 'Flexão de braços', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
+                    { nome: 'Remada curvada com halteres', serie: 3, repeticoes: '15', tempoDescanso: 30 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 3, repeticoes: '15', tempoDescanso: 30 },
+                    { nome: 'Supino reto com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
                     { nome: 'Burpee', serie: 3, repeticoes: '10', tempoDescanso: 60 },
                 ],
             },
@@ -294,8 +293,8 @@ const CATALOGO = [
                 exercicios: [
                     { nome: 'Agachamento com salto', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
                     { nome: 'Passada alternada com halteres', serie: 3, repeticoes: '12 por perna', tempoDescanso: 60 },
-                    { nome: 'Leg press 45°', serie: 3, repeticoes: '15-20', tempoDescanso: 60 },
-                    { nome: 'Elevação pélvica', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Leg press com pés altos', serie: 3, repeticoes: '15-20', tempoDescanso: 60 },
+                    { nome: 'Elevação de quadril', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                     { nome: 'Step up na caixa', serie: 3, repeticoes: '12 por perna', tempoDescanso: 45 },
                 ],
             },
@@ -303,11 +302,11 @@ const CATALOGO = [
                 nome: 'Core e Cardio',
                 diaSugerido: 'Quinta',
                 exercicios: [
-                    { nome: 'Abdominal supra', serie: 3, repeticoes: '20-25', tempoDescanso: 30 },
+                    { nome: 'Abdominal supra 3/4', serie: 3, repeticoes: '20-25', tempoDescanso: 30 },
                     { nome: 'Abdominal infra', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
-                    { nome: 'Prancha lateral', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
+                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
                     { nome: 'Bicicleta abdominal', serie: 3, repeticoes: '30 seg', tempoDescanso: 30 },
-                    { nome: 'Cardio leve: elíptico ou bicicleta', serie: 1, repeticoes: '20 min', tempoDescanso: 0 },
+                    { nome: 'Elíptico', serie: 1, repeticoes: '20 min', tempoDescanso: 0 },
                 ],
             },
             {
@@ -315,8 +314,8 @@ const CATALOGO = [
                 diaSugerido: 'Sexta',
                 exercicios: [
                     { nome: 'Agachamento com halteres', serie: 4, repeticoes: '15', tempoDescanso: 20 },
-                    { nome: 'Flexão de braço', serie: 4, repeticoes: '15', tempoDescanso: 20 },
-                    { nome: 'Remada com haltere', serie: 4, repeticoes: '15', tempoDescanso: 20 },
+                    { nome: 'Flexão de braços', serie: 4, repeticoes: '15', tempoDescanso: 20 },
+                    { nome: 'Remada curvada com halteres', serie: 4, repeticoes: '15', tempoDescanso: 20 },
                     { nome: 'Burpee', serie: 4, repeticoes: '10', tempoDescanso: 20 },
                     { nome: 'Kettlebell swing', serie: 3, repeticoes: '20', tempoDescanso: 60 },
                 ],
@@ -337,22 +336,22 @@ const CATALOGO = [
                 nome: 'Peito — Atleta Completo',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Supino reto com barra (pirâmide)', serie: 5, repeticoes: '12/10/8/6/4', tempoDescanso: 90 },
+                    { nome: 'Supino reto com barra', serie: 5, repeticoes: '12/10/8/6/4', tempoDescanso: 90 },
                     { nome: 'Supino inclinado com halteres', serie: 4, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Supino declinado com barra', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Crucifixo inclinado com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Crossover na polia', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Cross-over na polia', serie: 3, repeticoes: '15-20', tempoDescanso: 45 },
                 ],
             },
             {
                 nome: 'Costas — Atleta Completo',
                 diaSugerido: 'Terça',
                 exercicios: [
-                    { nome: 'Levantamento terra', serie: 4, repeticoes: '6-8', tempoDescanso: 150 },
-                    { nome: 'Barra fixa pronada com peso', serie: 4, repeticoes: '6-10', tempoDescanso: 120 },
+                    { nome: 'Levantamento terra com barra', serie: 4, repeticoes: '6-8', tempoDescanso: 150 },
+                    { nome: 'Barra fixa com carga', serie: 4, repeticoes: '6-10', tempoDescanso: 120 },
                     { nome: 'Remada curvada com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
-                    { nome: 'Puxada na polia (supinada)', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Remada unilateral com haltere', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
+                    { nome: 'Puxada alta supinada na polia', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Remada curvada unilateral com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
                 ],
             },
             {
@@ -360,7 +359,7 @@ const CATALOGO = [
                 diaSugerido: 'Quarta',
                 exercicios: [
                     { nome: 'Agachamento livre com barra', serie: 5, repeticoes: '6-10', tempoDescanso: 120 },
-                    { nome: 'Leg press 45°', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
+                    { nome: 'Leg press com pés altos', serie: 4, repeticoes: '10-12', tempoDescanso: 90 },
                     { nome: 'Stiff com barra', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
                     { nome: 'Passada com halteres', serie: 3, repeticoes: '12 por perna', tempoDescanso: 75 },
                     { nome: 'Panturrilha em pé na máquina', serie: 5, repeticoes: '12-20', tempoDescanso: 45 },
@@ -370,9 +369,9 @@ const CATALOGO = [
                 nome: 'Ombros — Atleta Completo',
                 diaSugerido: 'Quinta',
                 exercicios: [
-                    { nome: 'Desenvolvimento com barra (press militar)', serie: 4, repeticoes: '6-10', tempoDescanso: 90 },
-                    { nome: 'Elevação lateral com halteres (drop-set)', serie: 4, repeticoes: '10+10+10', tempoDescanso: 75 },
-                    { nome: 'Desenvolvimento Arnold', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Desenvolvimento militar em pé com barra', serie: 4, repeticoes: '6-10', tempoDescanso: 90 },
+                    { nome: 'Elevação lateral com halteres', serie: 4, repeticoes: '10+10+10', tempoDescanso: 75 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
                     { nome: 'Elevação frontal com barra', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
                     { nome: 'Crucifixo invertido (voador inverso)', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
                 ],
@@ -381,11 +380,11 @@ const CATALOGO = [
                 nome: 'Braços — Atleta Completo',
                 diaSugerido: 'Sexta',
                 exercicios: [
-                    { nome: 'Rosca direta com barra (21s)', serie: 4, repeticoes: '21 reps', tempoDescanso: 90 },
+                    { nome: 'Rosca direta com barra', serie: 4, repeticoes: '21 reps', tempoDescanso: 90 },
                     { nome: 'Rosca inclinada com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Rosca concentrada', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
-                    { nome: 'Tríceps francês com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
-                    { nome: 'Rosca punho (antebraço)', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
+                    { nome: 'Rosca concentrada com halteres', serie: 3, repeticoes: '12-15', tempoDescanso: 45 },
+                    { nome: 'Tríceps francês em pé com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 60 },
+                    { nome: 'Rosca de punho no banco com halteres', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
                 ],
             },
         ],
@@ -404,10 +403,10 @@ const CATALOGO = [
                 nome: 'Superior — Em Casa',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Flexão de braço', serie: 4, repeticoes: '15-20', tempoDescanso: 60 },
-                    { nome: 'Flexão de braço inclinada (pés na cadeira)', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
-                    { nome: 'Flexão diamante (tríceps)', serie: 3, repeticoes: '10-15', tempoDescanso: 60 },
-                    { nome: 'Remada invertida (embaixo da mesa)', serie: 4, repeticoes: '10-15', tempoDescanso: 75 },
+                    { nome: 'Flexão de braços', serie: 4, repeticoes: '15-20', tempoDescanso: 60 },
+                    { nome: 'Flexão declinada', serie: 3, repeticoes: '12-15', tempoDescanso: 60 },
+                    { nome: 'Flexão diamante', serie: 3, repeticoes: '10-15', tempoDescanso: 60 },
+                    { nome: 'Remada invertida', serie: 4, repeticoes: '10-15', tempoDescanso: 75 },
                     { nome: 'Pike push-up', serie: 3, repeticoes: '10-15', tempoDescanso: 60 },
                 ],
             },
@@ -418,7 +417,7 @@ const CATALOGO = [
                     { nome: 'Agachamento com peso corporal', serie: 4, repeticoes: '20-25', tempoDescanso: 60 },
                     { nome: 'Agachamento búlgaro (cadeira)', serie: 3, repeticoes: '12-15 por perna', tempoDescanso: 75 },
                     { nome: 'Passada estacionária', serie: 3, repeticoes: '15 por perna', tempoDescanso: 60 },
-                    { nome: 'Elevação pélvica no solo', serie: 4, repeticoes: '20-25', tempoDescanso: 45 },
+                    { nome: 'Elevação de quadril', serie: 4, repeticoes: '20-25', tempoDescanso: 45 },
                     { nome: 'Panturrilha na escada', serie: 4, repeticoes: '20-25', tempoDescanso: 30 },
                 ],
             },
@@ -426,9 +425,9 @@ const CATALOGO = [
                 nome: 'Core — Em Casa',
                 diaSugerido: 'Quinta',
                 exercicios: [
-                    { nome: 'Abdominal supra', serie: 3, repeticoes: '25-30', tempoDescanso: 30 },
+                    { nome: 'Abdominal supra 3/4', serie: 3, repeticoes: '25-30', tempoDescanso: 30 },
                     { nome: 'Prancha frontal', serie: 4, repeticoes: '45-60 seg', tempoDescanso: 30 },
-                    { nome: 'Prancha lateral', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
+                    { nome: 'Prancha lateral variação 2', serie: 3, repeticoes: '30 seg por lado', tempoDescanso: 30 },
                     { nome: 'Mountain climber', serie: 3, repeticoes: '30 seg', tempoDescanso: 30 },
                     { nome: 'Superman (extensão lombar)', serie: 3, repeticoes: '15-20', tempoDescanso: 30 },
                 ],
@@ -460,11 +459,11 @@ const CATALOGO = [
                 nome: 'Força para Corrida',
                 diaSugerido: 'Segunda',
                 exercicios: [
-                    { nome: 'Agachamento unilateral (pistol squat)', serie: 3, repeticoes: '8-10 por perna', tempoDescanso: 90 },
+                    { nome: 'Agachamento pistol', serie: 3, repeticoes: '8-10 por perna', tempoDescanso: 90 },
                     { nome: 'Passada com halteres', serie: 3, repeticoes: '12 por perna', tempoDescanso: 75 },
-                    { nome: 'Step up com halteres', serie: 3, repeticoes: '10 por perna', tempoDescanso: 75 },
-                    { nome: 'Panturrilha unilateral (déficit)', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
-                    { nome: 'Abdução de quadril lateral (elástico)', serie: 3, repeticoes: '20', tempoDescanso: 30 },
+                    { nome: 'Step up na caixa', serie: 3, repeticoes: '10 por perna', tempoDescanso: 75 },
+                    { nome: 'Panturrilha na escada', serie: 4, repeticoes: '15-20', tempoDescanso: 45 },
+                    { nome: 'Abdução de quadril sentado na máquina', serie: 3, repeticoes: '20', tempoDescanso: 30 },
                 ],
             },
             {
@@ -473,8 +472,8 @@ const CATALOGO = [
                 exercicios: [
                     { nome: 'Barra fixa supinada', serie: 4, repeticoes: '8-10', tempoDescanso: 90 },
                     { nome: 'Remada curvada com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Desenvolvimento com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
-                    { nome: 'Flexão de braço (variações)', serie: 3, repeticoes: '15-20', tempoDescanso: 60 },
+                    { nome: 'Desenvolvimento Arnold com halteres', serie: 3, repeticoes: '10-12', tempoDescanso: 75 },
+                    { nome: 'Flexão de braços', serie: 3, repeticoes: '15-20', tempoDescanso: 60 },
                     { nome: 'Prancha com caminhada nos cotovelos', serie: 3, repeticoes: '20 passos', tempoDescanso: 45 },
                 ],
             },
@@ -495,21 +494,13 @@ const CATALOGO = [
 
 class ProgramaController {
 
-    // GET /programas — lista programas do usuário
     static async listar(req, res) {
         try {
-            const programas = await Programa.find({ usuario: req.usuario._id })
-                .sort({ createdAt: -1 });
-
-            // Conta treinos de cada programa
+            const programas = await Programa.find({ usuario: req.usuario._id }).sort({ createdAt: -1 });
             const resultado = await Promise.all(programas.map(async (p) => {
-                const totalTreinos = await Treino.countDocuments({
-                    usuario: req.usuario._id,
-                    programa: p._id
-                });
+                const totalTreinos = await Treino.countDocuments({ usuario: req.usuario._id, programa: p._id });
                 return { ...p.toObject(), totalTreinos };
             }));
-
             res.status(200).json(resultado);
         } catch (error) {
             console.error('ERRO:', error);
@@ -517,13 +508,10 @@ class ProgramaController {
         }
     }
 
-    // POST /programas — cria novo programa
     static async criar(req, res) {
         try {
             const { nome, descricao, emoji } = req.body;
-            if (!nome?.trim()) {
-                return res.status(400).json({ message: 'Informe o nome do programa.' });
-            }
+            if (!nome?.trim()) return res.status(400).json({ message: 'Informe o nome do programa.' });
             const programa = await Programa.create({
                 nome: nome.trim(),
                 descricao: descricao?.trim() ?? '',
@@ -537,7 +525,6 @@ class ProgramaController {
         }
     }
 
-    // PUT /programas/:id — edita programa
     static async editar(req, res) {
         try {
             const { nome, descricao, emoji } = req.body;
@@ -554,21 +541,11 @@ class ProgramaController {
         }
     }
 
-    // DELETE /programas/:id — deleta programa e seus treinos
     static async deletar(req, res) {
         try {
-            const programa = await Programa.findOneAndDelete({
-                _id: req.params.id,
-                usuario: req.usuario._id
-            });
+            const programa = await Programa.findOneAndDelete({ _id: req.params.id, usuario: req.usuario._id });
             if (!programa) return res.status(404).json({ message: 'Programa não encontrado.' });
-
-            // Deleta todos os treinos do programa
-            await Treino.deleteMany({
-                usuario: req.usuario._id,
-                programa: req.params.id
-            });
-
+            await Treino.deleteMany({ usuario: req.usuario._id, programa: req.params.id });
             res.status(200).json({ message: 'Programa excluído com sucesso.' });
         } catch (error) {
             console.error('ERRO:', error);
@@ -576,28 +553,15 @@ class ProgramaController {
         }
     }
 
-    // GET /programas/catalogo — lista programas do catálogo
     static async listarCatalogo(req, res) {
         try {
             const { nivel, objetivo } = req.query;
-
-            const jaAdicionados = await Programa.find({
-                usuario: req.usuario._id,
-                doCatalogo: true
-            }).select('catalogoId');
-
+            const jaAdicionados = await Programa.find({ usuario: req.usuario._id, doCatalogo: true }).select('catalogoId');
             const idsAdicionados = jaAdicionados.map(p => p.catalogoId);
-
             let catalogo = CATALOGO;
             if (nivel) catalogo = catalogo.filter(p => p.nivel === nivel);
             if (objetivo) catalogo = catalogo.filter(p => p.objetivo === objetivo);
-
-            const resultado = catalogo.map(p => ({
-                ...p,
-                jaAdicionado: idsAdicionados.includes(p.id),
-                totalTreinos: p.treinos.length,
-            }));
-
+            const resultado = catalogo.map(p => ({ ...p, jaAdicionado: idsAdicionados.includes(p.id), totalTreinos: p.treinos.length }));
             res.status(200).json(resultado);
         } catch (error) {
             console.error('ERRO:', error);
@@ -605,23 +569,14 @@ class ProgramaController {
         }
     }
 
-    // POST /programas/catalogo/:id/adicionar — copia programa do catálogo
     static async adicionarDoCatalogo(req, res) {
         try {
             const { id } = req.params;
             const programaCatalogo = CATALOGO.find(p => p.id === id);
+            if (!programaCatalogo) return res.status(404).json({ message: 'Programa não encontrado no catálogo.' });
 
-            if (!programaCatalogo) {
-                return res.status(404).json({ message: 'Programa não encontrado no catálogo.' });
-            }
-
-            const jaExiste = await Programa.findOne({
-                usuario: req.usuario._id,
-                catalogoId: id
-            });
-            if (jaExiste) {
-                return res.status(400).json({ message: 'Você já adicionou este programa.' });
-            }
+            const jaExiste = await Programa.findOne({ usuario: req.usuario._id, catalogoId: id });
+            if (jaExiste) return res.status(400).json({ message: 'Você já adicionou este programa.' });
 
             const programa = await Programa.create({
                 nome: programaCatalogo.nome,
@@ -641,12 +596,10 @@ class ProgramaController {
             for (const treinoCat of programaCatalogo.treinos) {
                 const exerciciosComIds = await Promise.all(
                     treinoCat.exercicios.map(async (ex, ordem) => {
-                        // Tenta busca exata primeiro
                         let exercicioEncontrado = await Exercicios.findOne({
                             nome: { $regex: new RegExp(`^${ex.nome}$`, 'i') }
                         });
 
-                        // Se não achou, busca por palavras-chave principais
                         if (!exercicioEncontrado) {
                             const palavras = ex.nome
                                 .split(' ')
@@ -689,36 +642,18 @@ class ProgramaController {
                 });
             }
 
-            res.status(201).json({
-                message: `Programa "${programaCatalogo.nome}" adicionado com sucesso!`,
-                programa,
-            });
+            res.status(201).json({ message: `Programa "${programaCatalogo.nome}" adicionado com sucesso!`, programa });
         } catch (error) {
             console.error('ERRO:', error);
             res.status(500).json({ message: error.message });
         }
     }
 
-    // POST /programas/migrar — migra treinos sem programa para "Meus Treinos"
     static async migrar(req, res) {
         try {
-            // Verifica se já tem programa padrão
-            let programaPadrao = await Programa.findOne({
-                usuario: req.usuario._id,
-                nome: 'Meus Treinos'
-            });
-
-            // Busca treinos sem programa
-            const treinosSemPrograma = await Treino.find({
-                usuario: req.usuario._id,
-                programa: null
-            });
-
-            if (treinosSemPrograma.length === 0) {
-                return res.status(200).json({ message: 'Nenhum treino para migrar.' });
-            }
-
-            // Cria programa padrão se não existir
+            let programaPadrao = await Programa.findOne({ usuario: req.usuario._id, nome: 'Meus Treinos' });
+            const treinosSemPrograma = await Treino.find({ usuario: req.usuario._id, programa: null });
+            if (treinosSemPrograma.length === 0) return res.status(200).json({ message: 'Nenhum treino para migrar.' });
             if (!programaPadrao) {
                 programaPadrao = await Programa.create({
                     nome: 'Meus Treinos',
@@ -727,17 +662,8 @@ class ProgramaController {
                     usuario: req.usuario._id,
                 });
             }
-
-            // Migra treinos
-            await Treino.updateMany(
-                { usuario: req.usuario._id, programa: null },
-                { programa: programaPadrao._id }
-            );
-
-            res.status(200).json({
-                message: `${treinosSemPrograma.length} treino(s) migrado(s) para "${programaPadrao.nome}".`,
-                programa: programaPadrao,
-            });
+            await Treino.updateMany({ usuario: req.usuario._id, programa: null }, { programa: programaPadrao._id });
+            res.status(200).json({ message: `${treinosSemPrograma.length} treino(s) migrado(s).`, programa: programaPadrao });
         } catch (error) {
             console.error('ERRO:', error);
             res.status(500).json({ message: error.message });
