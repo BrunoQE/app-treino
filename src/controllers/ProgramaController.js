@@ -604,6 +604,7 @@ class ProgramaController {
                             const palavras = ex.nome
                                 .split(' ')
                                 .filter(p => p.length > 3)
+                                .map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
                                 .slice(0, 3)
                                 .join('.*');
                             exercicioEncontrado = await Exercicios.findOne({
