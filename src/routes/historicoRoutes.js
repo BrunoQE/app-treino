@@ -11,6 +11,7 @@ routes.get("/historico/evolucao", HistoricoController.buscarEvolucao);
 routes.get("/historico/volume-semanal", HistoricoController.buscarVolumeSemanal);
 routes.get("/historico/frequencia-mensal", HistoricoController.buscarFrequenciaMensal);
 routes.get("/historico/comparativo-semanal", HistoricoController.buscarComparativoSemanal);
+routes.get("/historico/personal-ia", HistoricoController.buscarPersonalIA);
 routes.get("/historico/sugestoes/:treinoId", HistoricoController.buscarSugestoesIA);
 routes.post("/historico", HistoricoController.salvarHistorico);
 
