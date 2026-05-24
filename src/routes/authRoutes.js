@@ -8,5 +8,7 @@ routes.post("/auth/registro", AuthController.registro);
 routes.post("/auth/login", AuthController.login);
 routes.get("/auth/perfil", autenticar, AuthController.buscarPerfil);
 routes.put("/auth/perfil", autenticar, AuthController.atualizarPerfil);
+routes.post("/auth/webhook-revenuecat", AuthController.webhookRevenueCat);
+routes.post("/auth/ativar-pro-manual", AuthController.ativarProManual); // ← só para testes
 
 export default routes;
