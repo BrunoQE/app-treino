@@ -14,18 +14,38 @@ const usuarioSchema = new mongoose.Schema({
     fotoPerfil: { type: String, default: null },
     codigoReset: { type: String, default: null },
     codigoResetExpira: { type: Date, default: null },
+
+    // ── PLANO ────────────────────────────────────────────────────────
+    plano: {
+        type: String,
+        enum: ['free', 'pro'],
+        default: 'free',
+    },
+    planoExpira: {
+        type: Date,
+        default: null, // null = free ou pro vitalício
+    },
+    revenuecatId: {
+        type: String,
+        default: null, // ID do cliente no RevenueCat
+    },
+
 }, { versionKey: false, timestamps: true });
 
-//antes de salvar criptografa a senha automaticamente
 usuarioSchema.pre('save', async function () {
-    //só criptografa se a senha foi modificada
     if (!this.isModified('senha')) return;
     this.senha = await bcrypt.hash(this.senha, 12);
 });
 
-//metodo para comparar a senha na hora do login
 usuarioSchema.methods.senhaCorreta = async function (senhaDigitada) {
     return await bcrypt.compare(senhaDigitada, this.senha);
+};
+
+// Verifica se o plano pro ainda está válido
+usuarioSchema.methods.isPro = function () {
+    if (this.plano !== 'pro') return false;
+    if (!this.planoExpira) return true; // sem data de expiração = pro vitalício
+    return new Date() < new Date(this.planoExpira);
 };
 
 const usuario = mongoose.model("usuarios", usuarioSchema);
