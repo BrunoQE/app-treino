@@ -244,6 +244,13 @@ class AuthController {
     // POST /auth/bloquear-programas-extras (teste)
     static async bloquearProgramasManual(req, res) {
         try {
+
+            const { programaAtivoId } = req.body;
+            console.log('programaAtivoId recebido:', programaAtivoId);
+
+            const programas = await programa.find({ usuario: req.usuario._id });
+            console.log('programas encontrados:', programas.map(p => ({ id: p._id, nome: p.nome })));
+
             const usuarioEncontrado = await usuario.findById(req.usuario._id);
             usuarioEncontrado.plano = 'free';
             usuarioEncontrado.planoExpira = null;
