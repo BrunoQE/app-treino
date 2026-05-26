@@ -244,18 +244,26 @@ class AuthController {
     // POST /auth/bloquear-programas-extras (teste)
     static async bloquearProgramasManual(req, res) {
         try {
-
             const { programaAtivoId } = req.body;
             console.log('programaAtivoId recebido:', programaAtivoId);
-
-            const programas = await programa.find({ usuario: req.usuario._id });
-            console.log('programas encontrados:', programas.map(p => ({ id: p._id, nome: p.nome })));
 
             const usuarioEncontrado = await usuario.findById(req.usuario._id);
             usuarioEncontrado.plano = 'free';
             usuarioEncontrado.planoExpira = null;
             await usuarioEncontrado.save();
-            await bloquearProgramasExtras(req.usuario._id);
+
+            const programas = await programa.find({ usuario: req.usuario._id });
+
+            for (const p of programas) {
+                // Compara como string para evitar problema de ObjectId vs string
+                const deveManterAtivo = p._id.toString() === programaAtivoId?.toString();
+                await programa.updateOne(
+                    { _id: p._id },
+                    { bloqueado: !deveManterAtivo }
+                );
+                console.log(`${p.nome}: bloqueado=${!deveManterAtivo}`);
+            }
+
             res.status(200).json({ message: 'Plano free e programas bloqueados!' });
         } catch (error) {
             console.error('ERRO:', error);
