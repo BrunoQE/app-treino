@@ -9,7 +9,11 @@
     "importar": "node --experimental-vm-modules src/scripts/importarExercicios.js",
     "corrigir": "node --experimental-vm-modules src/scripts/corrigirExercicios.js",
     "reimportar": "node --experimental-vm-modules src/scripts/reimportarExercicios.js",
-    "upload": "node --experimental-vm-modules src/scripts/uploadGifs.js"
+    "upload": "node --experimental-vm-modules src/scripts/uploadGifs.js",
+    "limpar": "node --experimental-vm-modules src/scripts/limparExerciciosOrfaos.js",
+    "mapear": "node --experimental-vm-modules src/scripts/mapearExercicios.js",
+    "atualizar": "node --experimental-vm-modules src/scripts/atualizarNomesExercicios.js",
+    "corrigirCatalogo": "node --experimental-vm-modules src/scripts/corrigirCatalogo.js"
   },
   "keywords": [],
   "author": "",
