@@ -575,7 +575,44 @@ class ProgramaController {
             const programaCatalogo = CATALOGO.find(p => p.id === id);
             if (!programaCatalogo) return res.status(404).json({ message: 'Programa não encontrado no catálogo.' });
 
-            const jaExiste = await Programa.findOne({ usuario: req.usuario._id, catalogoId: id });
+            // Verifica se já existe bloqueado
+            const jaExisteBloqueado = await Programa.findOne({
+                usuario: req.usuario._id,
+                catalogoId: id,
+                bloqueado: true
+            });
+
+            if (jaExisteBloqueado) {
+                // Verifica se já tem algum programa ativo
+                const temProgramaAtivo = await Programa.findOne({
+                    usuario: req.usuario._id,
+                    bloqueado: false
+                });
+
+                if (temProgramaAtivo) {
+                    return res.status(400).json({
+                        message: 'Você já possui um programa ativo. Assine o Pro para desbloquear mais programas.',
+                        codigo: 'LIMITE_FREE'
+                    });
+                }
+
+                // Sem programa ativo, desbloqueia o existente
+                await Programa.updateOne(
+                    { _id: jaExisteBloqueado._id },
+                    { bloqueado: false }
+                );
+                return res.status(200).json({
+                    message: `Programa "${programaCatalogo.nome}" desbloqueado!`,
+                    programa: jaExisteBloqueado,
+                });
+            }
+
+            // Verifica se já existe (não bloqueado)
+            const jaExiste = await Programa.findOne({
+                usuario: req.usuario._id,
+                catalogoId: id,
+                bloqueado: false
+            });
             if (jaExiste) return res.status(400).json({ message: 'Você já adicionou este programa.' });
 
             const programa = await Programa.create({
