@@ -1,4 +1,5 @@
 import historico from "../models/Historico.js";
+import Anthropic from '@anthropic-ai/sdk';
 
 class HistoricoController {
 
@@ -375,19 +376,20 @@ class HistoricoController {
 
     // GET /historico/personal-ia
     // Analisa o histórico e retorna insights personalizados
+    // Substitui o método buscarPersonalIA no HistoricoController.js
+    // Adiciona no topo do arquivo:
+    // import Anthropic from '@anthropic-ai/sdk';
+
+    // const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
     static async buscarPersonalIA(req, res) {
         try {
             const hoje = new Date();
-
-            // Busca últimos 60 dias de histórico
             const sessenta = new Date();
             sessenta.setDate(hoje.getDate() - 60);
 
             const historicos = await historico
-                .find({
-                    usuario: req.usuario._id,
-                    dataFim: { $gte: sessenta }
-                })
+                .find({ usuario: req.usuario._id, dataFim: { $gte: sessenta } })
                 .sort({ dataFim: -1 })
                 .exec();
 
@@ -396,12 +398,15 @@ class HistoricoController {
                     insights: [],
                     proximoTreino: null,
                     resumo: 'Nenhum treino registrado nos últimos 60 dias.',
+                    geradoPorIA: false,
                 });
             }
 
-            const insights = [];
+            // ── Prepara dados estruturados para a IA ─────────────────────
+            const totalTreinos = historicos.length;
+            const mediaMinutos = Math.round(historicos.reduce((a, h) => a + h.duracaoMinutos, 0) / totalTreinos);
 
-            // ── 1. GRUPOS NEGLIGENCIADOS ─────────────────────────────────
+            // Último treino por grupo muscular
             const ultimoTreinoPorGrupo = {};
             historicos.forEach(h => {
                 h.exerciciosRealizados.forEach(ex => {
@@ -412,160 +417,169 @@ class HistoricoController {
                 });
             });
 
-            // const gruposPrincipais = ['Peito', 'Costas', 'Quadríceps', 'Glúteos', 'Bíceps', 'Tríceps', 'Ombros', 'Abdominais'];
-            const gruposNegligenciados = [];
-            const gruposRecentes = [];
+            const gruposComDias = Object.entries(ultimoTreinoPorGrupo).map(([grupo, data]) => ({
+                grupo,
+                diasSemTreinar: Math.floor((hoje - new Date(data)) / (1000 * 60 * 60 * 24)),
+            })).sort((a, b) => b.diasSemTreinar - a.diasSemTreinar);
 
-            Object.entries(ultimoTreinoPorGrupo).forEach(([grupo, data]) => {
-                const diasSemTreinar = Math.floor((hoje - new Date(data)) / (1000 * 60 * 60 * 24));
-                if (diasSemTreinar >= 7) {
-                    gruposNegligenciados.push({ grupo, diasSemTreinar });
-                } else if (diasSemTreinar <= 3) {
-                    gruposRecentes.push({ grupo, diasSemTreinar });
-                }
-            });
-
-            gruposNegligenciados.sort((a, b) => b.diasSemTreinar - a.diasSemTreinar);
-
-            if (gruposNegligenciados.length > 0) {
-                const top = gruposNegligenciados.slice(0, 3);
-                insights.push({
-                    tipo: 'negligenciado',
-                    prioridade: 1,
-                    emoji: '⚠️',
-                    titulo: 'Grupos sem atenção',
-                    descricao: `${top.map(g => `${g.grupo} (${g.diasSemTreinar}d)`).join(', ')} sem treinar.`,
-                    grupos: top.map(g => g.grupo),
-                    acao: `Que tal incluir ${top[0].grupo} no próximo treino?`,
-                });
-            }
-
-            // ── 2. ESTAGNAÇÃO DE CARGA ───────────────────────────────────
+            // Evolução de carga por exercício
             const evolucaoPorExercicio = {};
             [...historicos].reverse().forEach(h => {
                 h.exerciciosRealizados.forEach(ex => {
                     if (!ex.peso || !ex.nome) return;
                     if (!evolucaoPorExercicio[ex.nome]) evolucaoPorExercicio[ex.nome] = [];
-                    evolucaoPorExercicio[ex.nome].push({ peso: ex.peso, data: h.dataFim });
+                    evolucaoPorExercicio[ex.nome].push(ex.peso);
                 });
             });
 
-            const estagnados = [];
-            const evoluindo = [];
+            const exerciciosComEvolucao = Object.entries(evolucaoPorExercicio)
+                .filter(([, pesos]) => pesos.length >= 2)
+                .map(([nome, pesos]) => ({
+                    nome,
+                    pesoInicial: pesos[0],
+                    pesoAtual: pesos[pesos.length - 1],
+                    evolucao: pesos[pesos.length - 1] - pesos[0],
+                    estagnado: pesos.slice(-3).every(p => p === pesos[pesos.length - 1]) && pesos.length >= 3,
+                }));
 
-            Object.entries(evolucaoPorExercicio).forEach(([nome, registros]) => {
-                if (registros.length < 3) return;
-                const ultimos = registros.slice(-3);
-                const todosMesmoPeso = ultimos.every(r => r.peso === ultimos[0].peso);
-                const melhorou = registros[registros.length - 1].peso > registros[0].peso;
-                const melhora = registros[registros.length - 1].peso - registros[registros.length - 2]?.peso;
-
-                if (todosMesmoPeso) {
-                    estagnados.push({ nome, peso: ultimos[0].peso });
-                } else if (melhorou && melhora > 0) {
-                    evoluindo.push({ nome, melhora, pesoAtual: registros[registros.length - 1].peso });
-                }
-            });
-
-            if (estagnados.length > 0) {
-                const top = estagnados.slice(0, 2);
-                insights.push({
-                    tipo: 'estagnacao',
-                    prioridade: 2,
-                    emoji: '📊',
-                    titulo: 'Carga estagnada',
-                    descricao: `${top.map(e => `${e.nome} (${e.peso}kg)`).join(', ')} com mesmo peso há 3+ treinos.`,
-                    acao: 'Tente aumentar o peso ou as repetições na próxima sessão.',
-                });
-            }
-
-            // ── 3. EVOLUÇÃO POSITIVA ─────────────────────────────────────
-            if (evoluindo.length > 0) {
-                const top = evoluindo.sort((a, b) => b.melhora - a.melhora).slice(0, 2);
-                insights.push({
-                    tipo: 'evolucao',
-                    prioridade: 3,
-                    emoji: '🚀',
-                    titulo: 'Você está evoluindo!',
-                    descricao: `${top.map(e => `${e.nome} +${e.melhora}kg`).join(' · ')}`,
-                    acao: 'Continue assim! A consistência está trazendo resultados.',
-                });
-            }
-
-            // ── 4. CONSISTÊNCIA SEMANAL ──────────────────────────────────
+            // Treinos desta semana
             const inicioSemana = new Date(hoje);
             inicioSemana.setDate(hoje.getDate() - hoje.getDay());
             inicioSemana.setHours(0, 0, 0, 0);
-
             const treinosSemana = historicos.filter(h => new Date(h.dataFim) >= inicioSemana);
-            const diasTreinados = new Set(
-                treinosSemana.map(h => new Date(h.dataFim).toLocaleDateString('pt-BR'))
-            ).size;
+            const diasTreinadosSemana = new Set(treinosSemana.map(h => new Date(h.dataFim).toLocaleDateString('pt-BR'))).size;
 
-            if (diasTreinados >= 4) {
-                insights.push({
-                    tipo: 'consistencia',
-                    prioridade: 4,
-                    emoji: '🔥',
-                    titulo: 'Semana incrível!',
-                    descricao: `Você já treinou ${diasTreinados} dias essa semana.`,
-                    acao: 'Mantenha o ritmo! Você está no caminho certo.',
+            // Grupo mais treinado
+            const contagemGrupos = {};
+            historicos.forEach(h => {
+                h.exerciciosRealizados.forEach(ex => {
+                    if (ex.grupoMuscular) contagemGrupos[ex.grupoMuscular] = (contagemGrupos[ex.grupoMuscular] ?? 0) + 1;
                 });
-            } else if (diasTreinados === 0) {
-                insights.push({
-                    tipo: 'alerta',
-                    prioridade: 1,
-                    emoji: '💤',
-                    titulo: 'Nenhum treino essa semana',
-                    descricao: 'Você ainda não treinou essa semana.',
-                    acao: 'Que tal retomar hoje? Mesmo um treino curto já faz diferença!',
-                });
-            }
+            });
+            const grupoMaisTreinado = Object.entries(contagemGrupos).sort(([, a], [, b]) => b - a)[0]?.[0] ?? null;
 
-            // ── 5. PRÓXIMO TREINO SUGERIDO ───────────────────────────────
-            let proximoTreino = null;
-            if (gruposNegligenciados.length > 0) {
-                proximoTreino = {
-                    grupo: gruposNegligenciados[0].grupo,
-                    motivo: `${gruposNegligenciados[0].diasSemTreinar} dias sem treinar este grupo`,
+            const resumo = { treinos60dias: totalTreinos, mediaMinutos, grupoMaisTreinado, diasTreinadosSemana };
+
+            // ── Chama Claude Haiku ────────────────────────────────────────
+            try {
+                const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+                const dadosParaIA = {
+                    periodo: '60 dias',
+                    totalTreinos,
+                    mediaMinutosPorTreino: mediaMinutos,
+                    diasTreinadosEstaSemana: diasTreinadosSemana,
+                    grupoMaisTreinado,
+                    gruposMusculares: gruposComDias,
+                    exerciciosComEvolucao: exerciciosComEvolucao.slice(0, 10), // limita para não estourar tokens
                 };
-            } else if (gruposRecentes.length < Object.keys(ultimoTreinoPorGrupo).length) {
-                const naoRecente = Object.entries(ultimoTreinoPorGrupo)
-                    .filter(([g]) => !gruposRecentes.find(r => r.grupo === g))
-                    .sort(([, a], [, b]) => new Date(a) - new Date(b));
-                if (naoRecente.length > 0) {
-                    const dias = Math.floor((hoje - new Date(naoRecente[0][1])) / (1000 * 60 * 60 * 24));
-                    proximoTreino = {
-                        grupo: naoRecente[0][0],
-                        motivo: `${dias} dias desde o último treino deste grupo`,
-                    };
+
+                const prompt = `Você é um personal trainer experiente e motivador. Analise os dados de treino abaixo e responda APENAS com um JSON válido, sem texto antes ou depois.
+
+Dados do usuário:
+${JSON.stringify(dadosParaIA, null, 2)}
+
+Responda com este JSON exato:
+{
+  "insights": [
+    {
+      "tipo": "negligenciado|estagnacao|evolucao|consistencia|alerta|periodizacao",
+      "emoji": "emoji aqui",
+      "titulo": "título curto",
+      "descricao": "descrição clara e motivadora em português",
+      "acao": "sugestão prática e específica",
+      "grupos": ["grupo1"] // opcional, só para tipo negligenciado
+    }
+  ],
+  "proximoTreino": {
+    "grupo": "nome do grupo muscular",
+    "motivo": "motivo curto e claro"
+  },
+  "periodizacao": {
+    "recomendacao": "deload|manter|intensificar|mudar_programa",
+    "motivo": "explicação clara em português",
+    "sugestao": "sugestão prática específica"
+  }
+}
+
+Regras:
+- Máximo 4 insights
+- Seja direto, motivador e específico
+- Use dados reais do histórico
+- Priorize: grupos negligenciados > estagnação > evolução positiva > consistência
+- Se treinar há mais de 6 semanas sem deload, sugira periodização
+- Responda sempre em português brasileiro`;
+
+                const response = await anthropic.messages.create({
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 1000,
+                    messages: [{ role: 'user', content: prompt }],
+                });
+
+                const textoResposta = response.content[0].text.trim();
+                const jsonLimpo = textoResposta.replace(/```json|```/g, '').trim();
+                const iaResposta = JSON.parse(jsonLimpo);
+
+                return res.status(200).json({
+                    insights: iaResposta.insights ?? [],
+                    proximoTreino: iaResposta.proximoTreino ?? null,
+                    periodizacao: iaResposta.periodizacao ?? null,
+                    resumo,
+                    geradoPorIA: true,
+                });
+
+            } catch (erroIA) {
+                console.error('Erro Claude API, usando fallback:', erroIA.message);
+                // ── Fallback: algoritmo de regras ─────────────────────────
+                const insights = [];
+
+                const negligenciados = gruposComDias.filter(g => g.diasSemTreinar >= 7).slice(0, 3);
+                if (negligenciados.length > 0) {
+                    insights.push({
+                        tipo: 'negligenciado',
+                        emoji: '⚠️',
+                        titulo: 'Grupos sem atenção',
+                        descricao: `${negligenciados.map(g => `${g.grupo} (${g.diasSemTreinar}d)`).join(', ')} sem treinar.`,
+                        acao: `Que tal incluir ${negligenciados[0].grupo} no próximo treino?`,
+                        grupos: negligenciados.map(g => g.grupo),
+                    });
                 }
+
+                const estagnados = exerciciosComEvolucao.filter(e => e.estagnado).slice(0, 2);
+                if (estagnados.length > 0) {
+                    insights.push({
+                        tipo: 'estagnacao',
+                        emoji: '📊',
+                        titulo: 'Carga estagnada',
+                        descricao: `${estagnados.map(e => `${e.nome} (${e.pesoAtual}kg)`).join(', ')} com mesmo peso há 3+ treinos.`,
+                        acao: 'Tente aumentar o peso ou as repetições na próxima sessão.',
+                    });
+                }
+
+                const evoluindo = exerciciosComEvolucao.filter(e => e.evolucao > 0 && !e.estagnado).slice(0, 2);
+                if (evoluindo.length > 0) {
+                    insights.push({
+                        tipo: 'evolucao',
+                        emoji: '🚀',
+                        titulo: 'Você está evoluindo!',
+                        descricao: `${evoluindo.map(e => `${e.nome} +${e.evolucao}kg`).join(' · ')}`,
+                        acao: 'Continue assim! A consistência está trazendo resultados.',
+                    });
+                }
+
+                if (diasTreinadosSemana >= 4) {
+                    insights.push({ tipo: 'consistencia', emoji: '🔥', titulo: 'Semana incrível!', descricao: `Você já treinou ${diasTreinadosSemana} dias essa semana.`, acao: 'Mantenha o ritmo!' });
+                } else if (diasTreinadosSemana === 0) {
+                    insights.push({ tipo: 'alerta', emoji: '💤', titulo: 'Nenhum treino essa semana', descricao: 'Você ainda não treinou essa semana.', acao: 'Que tal retomar hoje?' });
+                }
+
+                const proximoTreino = negligenciados.length > 0
+                    ? { grupo: negligenciados[0].grupo, motivo: `${negligenciados[0].diasSemTreinar} dias sem treinar este grupo` }
+                    : null;
+
+                return res.status(200).json({ insights, proximoTreino, resumo, geradoPorIA: false });
             }
 
-            // ── 6. RESUMO GERAL ──────────────────────────────────────────
-            const totalTreinos = historicos.length;
-            const mediaMinutos = Math.round(
-                historicos.reduce((a, h) => a + h.duracaoMinutos, 0) / totalTreinos
-            );
-            const grupoMaisTreinado = Object.entries(
-                historicos.reduce((acc, h) => {
-                    h.exerciciosRealizados.forEach(ex => {
-                        if (ex.grupoMuscular) acc[ex.grupoMuscular] = (acc[ex.grupoMuscular] ?? 0) + 1;
-                    });
-                    return acc;
-                }, {})
-            ).sort(([, a], [, b]) => b - a)[0]?.[0] ?? null;
-
-            const resumo = {
-                treinos60dias: totalTreinos,
-                mediaMinutos,
-                grupoMaisTreinado,
-                diasTreinadosSemana: diasTreinados,
-            };
-
-            insights.sort((a, b) => a.prioridade - b.prioridade);
-
-            res.status(200).json({ insights, proximoTreino, resumo });
         } catch (error) {
             console.error('ERRO:', error);
             res.status(500).json({ message: error.message });
