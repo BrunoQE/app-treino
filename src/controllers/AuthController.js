@@ -1,4 +1,5 @@
 import usuario from "../models/Usuario.js";
+import programa from "../models/Programa.js";
 import jwt from "jsonwebtoken";
 
 function gerarToken(id) {
@@ -19,6 +20,35 @@ function dadosUsuario(u) {
     };
 }
 
+// Bloqueia programas extras quando usuário volta para free
+// Mantém apenas o programa mais recente desbloqueado
+async function bloquearProgramasExtras(usuarioId) {
+    const programas = await programa.find({ usuario: usuarioId })
+        .sort({ updatedAt: -1 });
+
+    if (programas.length <= 1) return;
+
+    // O primeiro (mais recente) fica desbloqueado
+    const [maisRecente, ...extras] = programas;
+
+    await programa.updateOne(
+        { _id: maisRecente._id },
+        { bloqueado: false }
+    );
+
+    await programa.updateMany(
+        { _id: { $in: extras.map(p => p._id) } },
+        { bloqueado: true }
+    );
+}
+
+// Desbloqueia todos quando usuário assina Pro
+async function desbloquearTodosProgramas(usuarioId) {
+    await programa.updateMany(
+        { usuario: usuarioId },
+        { bloqueado: false }
+    );
+}
 class AuthController {
 
     // POST /auth/registro
@@ -163,9 +193,8 @@ class AuthController {
                     // Ativou ou renovou o Pro
                     usuarioEncontrado.plano = 'pro';
                     usuarioEncontrado.revenuecatId = app_user_id;
-                    usuarioEncontrado.planoExpira = expiration_at_ms
-                        ? new Date(expiration_at_ms)
-                        : null;
+                    usuarioEncontrado.planoExpira = expiration_at_ms ? new Date(expiration_at_ms) : null;
+                    await desbloquearTodosProgramas(usuarioEncontrado._id); // ← adiciona
                     break;
 
                 case 'CANCELLATION':
@@ -173,8 +202,8 @@ class AuthController {
                     // Cancelou ou expirou — volta para free
                     usuarioEncontrado.plano = 'free';
                     usuarioEncontrado.planoExpira = null;
+                    await bloquearProgramasExtras(usuarioEncontrado._id); // ← adiciona
                     break;
-
                 case 'BILLING_ISSUE':
                     // Problema no pagamento — mantém pro por enquanto mas loga
                     console.log(`[WEBHOOK] Billing issue para ${app_user_id}`);
@@ -199,12 +228,28 @@ class AuthController {
         try {
             const usuarioEncontrado = await usuario.findById(req.usuario._id);
             usuarioEncontrado.plano = 'pro';
-            usuarioEncontrado.planoExpira = null; // sem expiração no modo teste
+            usuarioEncontrado.planoExpira = null;
             await usuarioEncontrado.save();
+            await desbloquearTodosProgramas(req.usuario._id); // ← adiciona
             res.status(200).json({
                 message: 'Plano Pro ativado com sucesso!',
                 usuario: dadosUsuario(usuarioEncontrado),
             });
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    // POST /auth/bloquear-programas-extras (teste)
+    static async bloquearProgramasManual(req, res) {
+        try {
+            const usuarioEncontrado = await usuario.findById(req.usuario._id);
+            usuarioEncontrado.plano = 'free';
+            usuarioEncontrado.planoExpira = null;
+            await usuarioEncontrado.save();
+            await bloquearProgramasExtras(req.usuario._id);
+            res.status(200).json({ message: 'Plano free e programas bloqueados!' });
         } catch (error) {
             console.error('ERRO:', error);
             res.status(500).json({ message: error.message });

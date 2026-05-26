@@ -10,5 +10,6 @@ routes.get("/auth/perfil", autenticar, AuthController.buscarPerfil);
 routes.put("/auth/perfil", autenticar, AuthController.atualizarPerfil);
 routes.post("/auth/webhook-revenuecat", AuthController.webhookRevenueCat);
 routes.post("/auth/ativar-pro-manual", autenticar, AuthController.ativarProManual); // ← só para testes
+routes.post("/auth/bloquear-programas-manual", autenticar, AuthController.bloquearProgramasManual);
 
 export default routes;
