@@ -556,8 +556,8 @@ class ProgramaController {
     static async listarCatalogo(req, res) {
         try {
             const { nivel, objetivo } = req.query;
-            const jaAdicionados = await Programa.find({ usuario: req.usuario._id, doCatalogo: true }).select('catalogoId');
-            const idsAdicionados = jaAdicionados.map(p => p.catalogoId);
+            const jaAdicionados = await Programa.find({ usuario: req.usuario._id, doCatalogo: true }).select('catalogoId bloqueado');
+            const idsAdicionados = jaAdicionados.filter(p => !p.bloqueado).map(p => p.catalogoId);
             let catalogo = CATALOGO;
             if (nivel) catalogo = catalogo.filter(p => p.nivel === nivel);
             if (objetivo) catalogo = catalogo.filter(p => p.objetivo === objetivo);
