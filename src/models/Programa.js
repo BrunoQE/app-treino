@@ -11,6 +11,9 @@ const programaSchema = new mongoose.Schema({
     diasPorSemana: { type: Number, default: null },
     doCatalogo: { type: Boolean, default: false },
     catalogoId: { type: String, default: null },
+
+    // ── PLANO ────────────────────────────────────────────────────────
+    bloqueado: { type: Boolean, default: false }, // bloqueado quando usuário volta para free
 }, { timestamps: true, versionKey: false });
 
 const programa = mongoose.model('programas', programaSchema);
