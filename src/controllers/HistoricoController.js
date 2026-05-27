@@ -1,5 +1,6 @@
 import historico from "../models/Historico.js";
 import Anthropic from '@anthropic-ai/sdk';
+import CacheIA from '../models/CacheIA.js';
 
 class HistoricoController {
 
@@ -382,8 +383,37 @@ class HistoricoController {
 
     // const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+    // ── ADICIONA NO TOPO DO HistoricoController.js ──────────────────────
+    // import Anthropic from '@anthropic-ai/sdk';
+    // import CacheIA from '../models/CacheIA.js';
+
+    // ── SUBSTITUI o método buscarPersonalIA ─────────────────────────────
+
     static async buscarPersonalIA(req, res) {
         try {
+            const CACHE_HORAS = 2;
+
+            // ── Verifica cache ────────────────────────────────────────────
+            const cacheExistente = await CacheIA.findOne({
+                usuario: req.usuario._id,
+                tipo: 'personal_ia',
+            });
+
+            if (cacheExistente) {
+                const idadeHoras = (Date.now() - new Date(cacheExistente.criadoEm)) / (1000 * 60 * 60);
+                if (idadeHoras < CACHE_HORAS) {
+                    console.log(`[Personal IA] Cache válido (${idadeHoras.toFixed(1)}h) para ${req.usuario._id}`);
+                    return res.status(200).json({
+                        ...cacheExistente.resultado,
+                        fromCache: true,
+                        cacheIdade: `${Math.round(idadeHoras * 60)} minutos`,
+                    });
+                }
+                // Cache expirado — deleta
+                await CacheIA.deleteOne({ _id: cacheExistente._id });
+            }
+
+            // ── Busca histórico ───────────────────────────────────────────
             const hoje = new Date();
             const sessenta = new Date();
             sessenta.setDate(hoje.getDate() - 60);
@@ -399,14 +429,14 @@ class HistoricoController {
                     proximoTreino: null,
                     resumo: 'Nenhum treino registrado nos últimos 60 dias.',
                     geradoPorIA: false,
+                    fromCache: false,
                 });
             }
 
-            // ── Prepara dados estruturados para a IA ─────────────────────
+            // ── Prepara dados para a IA ───────────────────────────────────
             const totalTreinos = historicos.length;
             const mediaMinutos = Math.round(historicos.reduce((a, h) => a + h.duracaoMinutos, 0) / totalTreinos);
 
-            // Último treino por grupo muscular
             const ultimoTreinoPorGrupo = {};
             historicos.forEach(h => {
                 h.exerciciosRealizados.forEach(ex => {
@@ -422,7 +452,6 @@ class HistoricoController {
                 diasSemTreinar: Math.floor((hoje - new Date(data)) / (1000 * 60 * 60 * 24)),
             })).sort((a, b) => b.diasSemTreinar - a.diasSemTreinar);
 
-            // Evolução de carga por exercício
             const evolucaoPorExercicio = {};
             [...historicos].reverse().forEach(h => {
                 h.exerciciosRealizados.forEach(ex => {
@@ -442,14 +471,12 @@ class HistoricoController {
                     estagnado: pesos.slice(-3).every(p => p === pesos[pesos.length - 1]) && pesos.length >= 3,
                 }));
 
-            // Treinos desta semana
             const inicioSemana = new Date(hoje);
             inicioSemana.setDate(hoje.getDate() - hoje.getDay());
             inicioSemana.setHours(0, 0, 0, 0);
             const treinosSemana = historicos.filter(h => new Date(h.dataFim) >= inicioSemana);
             const diasTreinadosSemana = new Set(treinosSemana.map(h => new Date(h.dataFim).toLocaleDateString('pt-BR'))).size;
 
-            // Grupo mais treinado
             const contagemGrupos = {};
             historicos.forEach(h => {
                 h.exerciciosRealizados.forEach(ex => {
@@ -471,7 +498,7 @@ class HistoricoController {
                     diasTreinadosEstaSemana: diasTreinadosSemana,
                     grupoMaisTreinado,
                     gruposMusculares: gruposComDias,
-                    exerciciosComEvolucao: exerciciosComEvolucao.slice(0, 10), // limita para não estourar tokens
+                    exerciciosComEvolucao: exerciciosComEvolucao.slice(0, 10),
                 };
 
                 const prompt = `Você é um personal trainer experiente e motivador. Analise os dados de treino abaixo e responda APENAS com um JSON válido, sem texto antes ou depois.
@@ -488,7 +515,7 @@ Responda com este JSON exato:
       "titulo": "título curto",
       "descricao": "descrição clara e motivadora em português",
       "acao": "sugestão prática e específica",
-      "grupos": ["grupo1"] // opcional, só para tipo negligenciado
+      "grupos": ["grupo1"]
     }
   ],
   "proximoTreino": {
@@ -520,24 +547,35 @@ Regras:
                 const jsonLimpo = textoResposta.replace(/```json|```/g, '').trim();
                 const iaResposta = JSON.parse(jsonLimpo);
 
-                return res.status(200).json({
+                const resultado = {
                     insights: iaResposta.insights ?? [],
                     proximoTreino: iaResposta.proximoTreino ?? null,
                     periodizacao: iaResposta.periodizacao ?? null,
                     resumo,
                     geradoPorIA: true,
+                    fromCache: false,
+                };
+
+                // ── Salva no cache ────────────────────────────────────────
+                await CacheIA.create({
+                    usuario: req.usuario._id,
+                    tipo: 'personal_ia',
+                    resultado,
+                    criadoEm: new Date(),
                 });
 
+                console.log(`[Personal IA] Gerado por IA e cacheado para ${req.usuario._id}`);
+                return res.status(200).json(resultado);
+
             } catch (erroIA) {
-                console.error('Erro Claude API, usando fallback:', erroIA.message);
+                console.error('[Personal IA] Erro Claude API, usando fallback:', erroIA.message);
+
                 // ── Fallback: algoritmo de regras ─────────────────────────
                 const insights = [];
-
                 const negligenciados = gruposComDias.filter(g => g.diasSemTreinar >= 7).slice(0, 3);
                 if (negligenciados.length > 0) {
                     insights.push({
-                        tipo: 'negligenciado',
-                        emoji: '⚠️',
+                        tipo: 'negligenciado', emoji: '⚠️',
                         titulo: 'Grupos sem atenção',
                         descricao: `${negligenciados.map(g => `${g.grupo} (${g.diasSemTreinar}d)`).join(', ')} sem treinar.`,
                         acao: `Que tal incluir ${negligenciados[0].grupo} no próximo treino?`,
@@ -548,8 +586,7 @@ Regras:
                 const estagnados = exerciciosComEvolucao.filter(e => e.estagnado).slice(0, 2);
                 if (estagnados.length > 0) {
                     insights.push({
-                        tipo: 'estagnacao',
-                        emoji: '📊',
+                        tipo: 'estagnacao', emoji: '📊',
                         titulo: 'Carga estagnada',
                         descricao: `${estagnados.map(e => `${e.nome} (${e.pesoAtual}kg)`).join(', ')} com mesmo peso há 3+ treinos.`,
                         acao: 'Tente aumentar o peso ou as repetições na próxima sessão.',
@@ -559,8 +596,7 @@ Regras:
                 const evoluindo = exerciciosComEvolucao.filter(e => e.evolucao > 0 && !e.estagnado).slice(0, 2);
                 if (evoluindo.length > 0) {
                     insights.push({
-                        tipo: 'evolucao',
-                        emoji: '🚀',
+                        tipo: 'evolucao', emoji: '🚀',
                         titulo: 'Você está evoluindo!',
                         descricao: `${evoluindo.map(e => `${e.nome} +${e.evolucao}kg`).join(' · ')}`,
                         acao: 'Continue assim! A consistência está trazendo resultados.',
@@ -577,7 +613,7 @@ Regras:
                     ? { grupo: negligenciados[0].grupo, motivo: `${negligenciados[0].diasSemTreinar} dias sem treinar este grupo` }
                     : null;
 
-                return res.status(200).json({ insights, proximoTreino, resumo, geradoPorIA: false });
+                return res.status(200).json({ insights, proximoTreino, resumo, geradoPorIA: false, fromCache: false });
             }
 
         } catch (error) {
