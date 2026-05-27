@@ -13,6 +13,7 @@ routes.get("/historico/frequencia-mensal", HistoricoController.buscarFrequenciaM
 routes.get("/historico/comparativo-semanal", HistoricoController.buscarComparativoSemanal);
 routes.get("/historico/personal-ia", HistoricoController.buscarPersonalIA);
 routes.get("/historico/sugestoes/:treinoId", HistoricoController.buscarSugestoesIA);
+routes.get("/historico/analytics-ia", HistoricoController.buscarAnalyticsIA);
 routes.post("/historico", HistoricoController.salvarHistorico);
 
 export default routes;
