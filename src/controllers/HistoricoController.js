@@ -621,6 +621,195 @@ Regras:
             res.status(500).json({ message: error.message });
         }
     }
+
+    // ── ADICIONA NO HistoricoController.js ──────────────────────────────
+    // Novo método: buscarAnalyticsIA
+    // Nova rota: GET /historico/analytics-ia
+
+    static async buscarAnalyticsIA(req, res) {
+        try {
+            const CACHE_HORAS = 2;
+
+            // ── Verifica cache ────────────────────────────────────────────
+            const cacheExistente = await CacheIA.findOne({
+                usuario: req.usuario._id,
+                tipo: 'analytics_ia',
+            });
+
+            if (cacheExistente) {
+                const idadeHoras = (Date.now() - new Date(cacheExistente.criadoEm)) / (1000 * 60 * 60);
+                if (idadeHoras < CACHE_HORAS) {
+                    console.log(`[Analytics IA] Cache válido (${idadeHoras.toFixed(1)}h)`);
+                    return res.status(200).json({ ...cacheExistente.resultado, fromCache: true });
+                }
+                await CacheIA.deleteOne({ _id: cacheExistente._id });
+            }
+
+            // ── Busca dados ───────────────────────────────────────────────
+            const hoje = new Date();
+
+            // Semana atual
+            const inicioSemanaAtual = new Date(hoje);
+            inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
+            inicioSemanaAtual.setHours(0, 0, 0, 0);
+
+            // Semana anterior
+            const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+            inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+
+            // Últimas 8 semanas
+            const oitoSemanasAtras = new Date();
+            oitoSemanasAtras.setDate(hoje.getDate() - 56);
+
+            // Últimos 6 meses
+            const seisMesesAtras = new Date();
+            seisMesesAtras.setMonth(seisMesesAtras.getMonth() - 5);
+
+            const [historicosRecentes, historicosMeses] = await Promise.all([
+                historico.find({ usuario: req.usuario._id, dataFim: { $gte: oitoSemanasAtras } }).sort({ dataFim: -1 }).exec(),
+                historico.find({ usuario: req.usuario._id, dataFim: { $gte: seisMesesAtras } }).sort({ dataFim: 1 }).exec(),
+            ]);
+
+            if (historicosRecentes.length === 0) {
+                return res.status(200).json({
+                    resumo: null,
+                    geradoPorIA: false,
+                    fromCache: false,
+                });
+            }
+
+            // Calcula métricas
+            const semanaAtual = historicosRecentes.filter(h => new Date(h.dataFim) >= inicioSemanaAtual);
+            const semanaAnterior = historicosRecentes.filter(h => {
+                const d = new Date(h.dataFim);
+                return d >= inicioSemanaAnterior && d < inicioSemanaAtual;
+            });
+
+            function calcularSemana(registros) {
+                const treinos = registros.length;
+                const minutos = registros.reduce((a, r) => a + (r.duracaoMinutos ?? 0), 0);
+                const volume = registros.reduce((a, r) => {
+                    return a + r.exerciciosRealizados.reduce((b, ex) => {
+                        if (!ex.peso) return b;
+                        return b + ex.peso * (parseInt(ex.serie) || 1) * (parseInt(ex.repeticoes) || 1);
+                    }, 0);
+                }, 0);
+                const grupos = new Set();
+                registros.forEach(r => r.exerciciosRealizados.forEach(ex => { if (ex.grupoMuscular) grupos.add(ex.grupoMuscular); }));
+                return { treinos, minutos, volume: Math.round(volume), grupos: grupos.size };
+            }
+
+            const atual = calcularSemana(semanaAtual);
+            const anterior = calcularSemana(semanaAnterior);
+
+            // Volume por grupo nas últimas 8 semanas
+            const volumePorGrupo = {};
+            historicosRecentes.forEach(h => {
+                h.exerciciosRealizados.forEach(ex => {
+                    if (!ex.peso || !ex.grupoMuscular) return;
+                    const v = ex.peso * (parseInt(ex.serie) || 1) * (parseInt(ex.repeticoes) || 1);
+                    volumePorGrupo[ex.grupoMuscular] = (volumePorGrupo[ex.grupoMuscular] ?? 0) + v;
+                });
+            });
+
+            const gruposOrdenados = Object.entries(volumePorGrupo)
+                .sort(([, a], [, b]) => b - a)
+                .map(([grupo, volume]) => ({ grupo, volume: Math.round(volume) }));
+
+            // Treinos por mês
+            const treinosPorMes = {};
+            historicosMeses.forEach(h => {
+                const d = new Date(h.dataFim);
+                const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                treinosPorMes[chave] = (treinosPorMes[chave] ?? 0) + 1;
+            });
+
+            const mesesComTreino = Object.values(treinosPorMes);
+            const mediaMensal = mesesComTreino.length > 0
+                ? Math.round(mesesComTreino.reduce((a, b) => a + b, 0) / mesesComTreino.length)
+                : 0;
+            const melhorMes = Math.max(...mesesComTreino, 0);
+
+            const dadosParaIA = {
+                semanaAtual: atual,
+                semanaAnterior: anterior,
+                deltaTreinos: anterior.treinos > 0 ? Math.round(((atual.treinos - anterior.treinos) / anterior.treinos) * 100) : 0,
+                deltaVolume: anterior.volume > 0 ? Math.round(((atual.volume - anterior.volume) / anterior.volume) * 100) : 0,
+                gruposMaisTrabalhadosUltimas8Semanas: gruposOrdenados.slice(0, 5),
+                gruposMenosTrabalhadosUltimas8Semanas: gruposOrdenados.slice(-3).reverse(),
+                mediaTreinosMensal: mediaMensal,
+                melhorMesTreinos: melhorMes,
+                totalTreinos8Semanas: historicosRecentes.length,
+            };
+
+            // ── Chama Claude Haiku ────────────────────────────────────────
+            try {
+                const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+                const prompt = `Você é um personal trainer analítico e motivador. Analise os dados de performance abaixo e responda APENAS com um JSON válido.
+
+Dados:
+${JSON.stringify(dadosParaIA, null, 2)}
+
+Responda com este JSON:
+{
+  "titulo": "título curto e impactante (max 6 palavras)",
+  "resumo": "análise personalizada em 2-3 frases, direta e motivadora, citando números reais",
+  "destaque": "1 ponto positivo específico com número real",
+  "alerta": "1 ponto de atenção específico (ou null se tudo ok)",
+  "tendencia": "crescendo|estavel|declinando",
+  "dica": "1 sugestão prática e específica baseada nos dados"
+}
+
+Regras:
+- Use os números reais dos dados
+- Seja direto e motivador
+- Compare semana atual com anterior
+- Destaque o grupo mais e menos trabalhado
+- Responda em português brasileiro`;
+
+                const response = await anthropic.messages.create({
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 500,
+                    messages: [{ role: 'user', content: prompt }],
+                });
+
+                const textoResposta = response.content[0].text.trim();
+                const jsonLimpo = textoResposta.replace(/```json|```/g, '').trim();
+                const iaResposta = JSON.parse(jsonLimpo);
+
+                const resultado = {
+                    resumo: iaResposta,
+                    dadosMetricas: dadosParaIA,
+                    geradoPorIA: true,
+                    fromCache: false,
+                };
+
+                await CacheIA.create({
+                    usuario: req.usuario._id,
+                    tipo: 'analytics_ia',
+                    resultado,
+                    criadoEm: new Date(),
+                });
+
+                console.log(`[Analytics IA] Gerado por IA e cacheado`);
+                return res.status(200).json(resultado);
+
+            } catch (erroIA) {
+                console.error('[Analytics IA] Erro Claude API:', erroIA.message);
+                return res.status(200).json({
+                    resumo: null,
+                    dadosMetricas: dadosParaIA,
+                    geradoPorIA: false,
+                    fromCache: false,
+                });
+            }
+
+        } catch (error) {
+            console.error('ERRO:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 function calcularRecorde(diasTreinados) {
