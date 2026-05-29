@@ -108,7 +108,6 @@ class ExercicioController {
                 return res.status(400).json({ message: 'Informe o grupo muscular.' });
             }
 
-            // IDs a excluir — exercício atual + exercícios já no treino
             const idsExcluir = [
                 exercicioAtualId,
                 ...(exerciciosNoTreinoIds ? exerciciosNoTreinoIds.split(',') : [])
@@ -117,14 +116,14 @@ class ExercicioController {
             const substitutos = await exercicio
                 .find({
                     grupoMuscular,
-                    _id: { $nin: idsExcluir }
+                    _id: { $nin: idsExcluir },
+                    gifUrl: { $exists: true, $ne: null }, // ← só exercícios com GIF
                 })
-                .limit(3)
+                .limit(8) // ← aumenta para 8
                 .exec();
 
             res.status(200).json(substitutos);
         } catch (error) {
-            console.error('ERRO:', error);
             res.status(500).json({ message: error.message });
         }
     }
