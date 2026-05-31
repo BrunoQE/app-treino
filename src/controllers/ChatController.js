@@ -3,7 +3,7 @@ import ChatMensagem from "../models/ChatMensagem.js";
 import Historico from "../models/Historico.js";
 import Treino from "../models/Treino.js";
 import Usuario from "../models/Usuario.js";
-import exercicio from "../models/Exercicio.js";
+import exercicio from "../models/Exercicios.js";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
