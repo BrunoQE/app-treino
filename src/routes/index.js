@@ -7,12 +7,13 @@ import autenticar from "../middlewares/authMiddleware.js";
 import desafio from "../routes/desafioRouters.js";
 import resetSenhaRoutes from "../routes/resetSenhaRoutes.js";
 import programaRoutetes from "../routes/programaRoutes.js";
+import chatRoutes from "../routes/chatRoutes.js";
 
 const routes = (app) => {
     app.route("/").get((req, res) => res.status(200).send("Treino Certo API"));
 
     // Rotas públicas
-    app.use(express.json(), auth, resetSenhaRoutes);
+    app.use(express.json(), auth, resetSenhaRoutes, chatRoutes);
 
     // Rotas protegidas
     app.use(express.json(), autenticar, treino, exercicio, historico, desafio, programaRoutetes);
