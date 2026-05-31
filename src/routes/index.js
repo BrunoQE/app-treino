@@ -13,7 +13,9 @@ const routes = (app) => {
     app.route("/").get((req, res) => res.status(200).send("Treino Certo API"));
 
     // Rotas públicas
-    app.use(express.json(), auth, resetSenhaRoutes, chatRoutes);
+    app.use(express.json(), auth, resetSenhaRoutes);
+
+    app.use(chatRoutes);
 
     // Rotas protegidas
     app.use(express.json(), autenticar, treino, exercicio, historico, desafio, programaRoutetes);
