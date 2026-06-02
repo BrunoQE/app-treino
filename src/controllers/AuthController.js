@@ -20,28 +20,6 @@ function dadosUsuario(u) {
     };
 }
 
-// Bloqueia programas extras quando usuário volta para free
-// Mantém apenas o programa mais recente desbloqueado
-async function bloquearProgramasExtras(usuarioId) {
-    const programas = await programa.find({ usuario: usuarioId })
-        .sort({ updatedAt: -1 });
-
-    if (programas.length <= 1) return;
-
-    // O primeiro (mais recente) fica desbloqueado
-    const [maisRecente, ...extras] = programas;
-
-    await programa.updateOne(
-        { _id: maisRecente._id },
-        { bloqueado: false }
-    );
-
-    await programa.updateMany(
-        { _id: { $in: extras.map(p => p._id) } },
-        { bloqueado: true }
-    );
-}
-
 // Desbloqueia todos quando usuário assina Pro
 async function desbloquearTodosProgramas(usuarioId) {
     await programa.updateMany(
@@ -202,7 +180,6 @@ class AuthController {
                     // Cancelou ou expirou — volta para free
                     usuarioEncontrado.plano = 'free';
                     usuarioEncontrado.planoExpira = null;
-                    await bloquearProgramasExtras(usuarioEncontrado._id); // ← adiciona
                     break;
                 case 'BILLING_ISSUE':
                     // Problema no pagamento — mantém pro por enquanto mas loga
@@ -251,18 +228,6 @@ class AuthController {
             usuarioEncontrado.plano = 'free';
             usuarioEncontrado.planoExpira = null;
             await usuarioEncontrado.save();
-
-            const programas = await programa.find({ usuario: req.usuario._id });
-
-            for (const p of programas) {
-                // Compara como string para evitar problema de ObjectId vs string
-                const deveManterAtivo = p._id.toString() === programaAtivoId?.toString();
-                await programa.updateOne(
-                    { _id: p._id },
-                    { bloqueado: !deveManterAtivo }
-                );
-                console.log(`${p.nome}: bloqueado=${!deveManterAtivo}`);
-            }
 
             res.status(200).json({ message: 'Plano free e programas bloqueados!' });
         } catch (error) {

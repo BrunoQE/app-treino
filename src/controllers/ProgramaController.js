@@ -583,20 +583,7 @@ class ProgramaController {
             });
 
             if (jaExisteBloqueado) {
-                // Verifica se já tem algum programa ativo
-                const temProgramaAtivo = await Programa.findOne({
-                    usuario: req.usuario._id,
-                    bloqueado: false
-                });
-
-                if (temProgramaAtivo) {
-                    return res.status(400).json({
-                        message: 'Você já possui um programa ativo. Assine o Pro para desbloquear mais programas.',
-                        codigo: 'LIMITE_FREE'
-                    });
-                }
-
-                // Sem programa ativo, desbloqueia o existente
+                // Desbloqueia direto — sem verificar limite
                 await Programa.updateOne(
                     { _id: jaExisteBloqueado._id },
                     { bloqueado: false }
@@ -607,13 +594,6 @@ class ProgramaController {
                 });
             }
 
-            // Verifica se já existe (não bloqueado)
-            const jaExiste = await Programa.findOne({
-                usuario: req.usuario._id,
-                catalogoId: id,
-                bloqueado: false
-            });
-            if (jaExiste) return res.status(400).json({ message: 'Você já adicionou este programa.' });
 
             const programa = await Programa.create({
                 nome: programaCatalogo.nome,
